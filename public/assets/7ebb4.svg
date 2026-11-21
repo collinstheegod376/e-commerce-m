@@ -1,0 +1,6 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="98" height="191" viewBox="0 0 98 191" fill="none" xmlns="http://www.w3.org/2000/svg">
+<mask id="stroke0_0_11" fill="white">
+<path d="M0 8C0 3.58173 3.58172 0 8 0H98V191H8C3.58172 191 0 187.418 0 183V8Z"/>
+</mask>
+<path id="Rectangle 5063" d="M98 0H8C3.58172 0 0 3.58173 0 8V183C0 187.418 3.58172 191 8 191H98V0Z" stroke-width="2" stroke="#D6D6D6" mask="url(#stroke0_0_11)"/>
+</svg>

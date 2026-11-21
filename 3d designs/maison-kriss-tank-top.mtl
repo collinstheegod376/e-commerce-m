@@ -1,0 +1,13 @@
+# Maison Kriss Men's Athletic Tank Top - 4K PBR Material
+newmtl Maison_Kriss_4K_Performance_Knit_PBR
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+Ks 0.180 0.180 0.180
+Ns 32.0
+d 1.0
+illum 2
+map_Kd textures/tank_top_albedo_4k.png
+map_Bump -bm 0.85 textures/tank_top_normal_4k.png
+norm textures/tank_top_normal_4k.png
+map_Pr textures/tank_top_orm_4k.png
+disp textures/tank_top_height_4k.png
