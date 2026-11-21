@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code')
   const nextParam = searchParams.get('next')
 
-  const defaultNext = typeParam === 'recovery' ? '/reset-password' : '/reset-password'
+  const defaultNext = typeParam === 'recovery' ? '/reset-password' : '/'
   const safeNext = sanitizeNextPath(nextParam, defaultNext)
 
   const supabase = await createServerSupabaseClient()

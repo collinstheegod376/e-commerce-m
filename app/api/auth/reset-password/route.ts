@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { checkRateLimit, extractClientIp } from '@/lib/rate-limit'
+import { checkRateLimit, extractClientIp, rateLimitHeaders } from '@/lib/rate-limit'
 import { handleRouteError, jsonError } from '@/lib/http'
 
 const resetSchema = z.object({
@@ -15,7 +15,12 @@ export async function POST(request: NextRequest) {
 
     const limit = await checkRateLimit(`reset:${ip}`, 5, 60)
     if (!limit.allowed) {
-      return jsonError(429, 'Too many password reset attempts. Please wait a minute.', 'RATE_LIMITED')
+      return jsonError(
+        429,
+        'Too many password reset attempts. Please wait a minute.',
+        'RATE_LIMITED',
+        rateLimitHeaders(limit),
+      )
     }
 
     const supabase = await createServerSupabaseClient()

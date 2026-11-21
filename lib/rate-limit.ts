@@ -1,9 +1,13 @@
 import 'server-only'
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
 
 export interface RateLimitResult {
   allowed: boolean
+  limit: number
   remaining: number
   resetAt: number
+  retryAfterSeconds: number
 }
 
 interface MemoryBucket {
@@ -12,59 +16,99 @@ interface MemoryBucket {
 }
 
 const globalForRateLimit = globalThis as unknown as {
-  authRateLimitBuckets?: Map<string, MemoryBucket>
+  rateLimitBuckets?: Map<string, MemoryBucket>
+  upstashRedis?: Redis | null
+  upstashLimiters?: Map<string, Ratelimit>
+  upstashEphemeralCache?: Map<string, number>
 }
 
 const memoryBuckets =
-  globalForRateLimit.authRateLimitBuckets ?? new Map<string, MemoryBucket>()
+  globalForRateLimit.rateLimitBuckets ?? new Map<string, MemoryBucket>()
+if (!globalForRateLimit.rateLimitBuckets) {
+  globalForRateLimit.rateLimitBuckets = memoryBuckets
+}
 
-if (!globalForRateLimit.authRateLimitBuckets) {
-  globalForRateLimit.authRateLimitBuckets = memoryBuckets
+const limiters =
+  globalForRateLimit.upstashLimiters ?? new Map<string, Ratelimit>()
+if (!globalForRateLimit.upstashLimiters) {
+  globalForRateLimit.upstashLimiters = limiters
+}
+
+const ephemeralCache =
+  globalForRateLimit.upstashEphemeralCache ?? new Map<string, number>()
+if (!globalForRateLimit.upstashEphemeralCache) {
+  globalForRateLimit.upstashEphemeralCache = ephemeralCache
+}
+
+export function getUpstashRedis(): Redis | null {
+  if (globalForRateLimit.upstashRedis !== undefined) {
+    return globalForRateLimit.upstashRedis
+  }
+
+  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL
+  const token =
+    process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN
+
+  if (!url || !token) {
+    return null
+  }
+
+  const client = new Redis({ url, token })
+  globalForRateLimit.upstashRedis = client
+  return client
+}
+
+function getUpstashLimiter(limit: number, windowSeconds: number): Ratelimit | null {
+  const redis = getUpstashRedis()
+  if (!redis) return null
+
+  const cacheKey = `${limit}:${windowSeconds}`
+  const existing = limiters.get(cacheKey)
+  if (existing) return existing
+
+  const limiter = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(limit, `${windowSeconds} s`),
+    prefix: 'mk:rl',
+    ephemeralCache,
+    analytics: false,
+  })
+  limiters.set(cacheKey, limiter)
+  return limiter
+}
+
+function computeRetryAfter(resetAt: number): number {
+  return Math.max(1, Math.ceil((resetAt - Date.now()) / 1000))
 }
 
 /**
- * Rate limiter for /api/auth/* routes (default: 5 attempts per 60 seconds).
- * Uses Upstash Redis / Vercel KV REST API when configured; falls back to a
- * best-effort process-local Map when no Redis credentials are present.
+ * Distributed sliding-window rate limiter backed by Upstash Redis (@upstash/ratelimit).
+ * Falls back to a best-effort process-local Map when Redis credentials are not configured
+ * or if Redis is temporarily unreachable.
  */
 export async function checkRateLimit(
   key: string,
   limit = 5,
   windowSeconds = 60,
 ): Promise<RateLimitResult> {
-  const redisUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL
-  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN
+  const limiter = getUpstashLimiter(limit, windowSeconds)
 
-  if (redisUrl && redisToken) {
+  if (limiter) {
     try {
-      const redisKey = `rl:auth:${key}`
-      const res = await fetch(`${redisUrl.replace(/\/$/, '')}/pipeline`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${redisToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify([
-          ['INCR', redisKey],
-          ['EXPIRE', redisKey, String(windowSeconds), 'NX'],
-          ['TTL', redisKey],
-        ]),
-        signal: AbortSignal.timeout(1500),
-      })
-
-      if (res.ok) {
-        const data = (await res.json()) as Array<{ result?: number }>
-        const count = Number(data[0]?.result ?? 1)
-        const ttl = Number(data[2]?.result ?? windowSeconds)
-        const resetAt = Date.now() + Math.max(ttl, 1) * 1000
-        return {
-          allowed: count <= limit,
-          remaining: Math.max(limit - count, 0),
-          resetAt,
-        }
+      const result = await limiter.limit(key)
+      const resetAt = result.reset
+      return {
+        allowed: result.success,
+        limit: result.limit,
+        remaining: Math.max(result.remaining, 0),
+        resetAt,
+        retryAfterSeconds: computeRetryAfter(resetAt),
       }
     } catch (err) {
-      console.warn('[rate-limit] Redis unavailable, falling back to in-memory limiter:', err)
+      console.warn(
+        '[rate-limit] Upstash Redis unavailable, falling back to in-memory limiter:',
+        err,
+      )
     }
   }
 
@@ -80,14 +124,31 @@ export async function checkRateLimit(
         if (v.resetAt <= now) memoryBuckets.delete(k)
       }
     }
-    return { allowed: true, remaining: limit - 1, resetAt }
+    return {
+      allowed: true,
+      limit,
+      remaining: Math.max(limit - 1, 0),
+      resetAt,
+      retryAfterSeconds: computeRetryAfter(resetAt),
+    }
   }
 
   existing.count += 1
   return {
     allowed: existing.count <= limit,
+    limit,
     remaining: Math.max(limit - existing.count, 0),
     resetAt: existing.resetAt,
+    retryAfterSeconds: computeRetryAfter(existing.resetAt),
+  }
+}
+
+export function rateLimitHeaders(result: RateLimitResult): Record<string, string> {
+  return {
+    'X-RateLimit-Limit': String(result.limit),
+    'X-RateLimit-Remaining': String(result.remaining),
+    'X-RateLimit-Reset': String(Math.ceil(result.resetAt / 1000)),
+    'Retry-After': String(result.retryAfterSeconds),
   }
 }
 

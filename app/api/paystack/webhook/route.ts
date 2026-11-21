@@ -1,18 +1,32 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { Prisma } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import { verifyPaystackSignature } from '@/lib/paystack'
+import { notifier, type FullOrder } from '@/lib/notifier'
+import { emails } from '@/lib/emails'
 import { handleRouteError, jsonError } from '@/lib/http'
+
+interface PaystackWebhookPayload {
+  event?: string
+  data?: {
+    id?: number | string
+    reference?: string
+    amount?: number
+    currency?: string
+    paid_at?: string
+    status?: string
+    metadata?: {
+      orderReference?: string
+    }
+  }
+}
 
 /**
  * POST /api/paystack/webhook -> 200 (idempotent)
  *
- * TODO(HANDOFF-TO-AGENT-4): Complete Paystack webhook processing:
- *  1. Signature verification below already uses timingSafeEqual on raw body.
- *  2. Insert PaymentEvent with unique paystackEventId for idempotency.
- *  3. Verify Paystack amount/currency matches Order.totalKobo server-side.
- *  4. In a Prisma transaction: transition Order to 'paid', set paidAt & paystackRef,
- *     decrement ProductVariant.stockQty (where non-null), and clear user's Cart.
- *  5. Call notifier.notifyPaidOrder(order) + emails.sendReceipt(order) (Agent 5),
- *     or notifier.notifyFailedOrder(order) on failed events.
+ * Processes Paystack webhook events with HMAC-SHA512 signature verification,
+ * PaymentEvent idempotency, server-side amount/currency validation, atomic
+ * stock decrement & cart clearing, and resilient Telegram/Resend dispatch.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -29,21 +43,145 @@ export async function POST(request: NextRequest) {
       return jsonError(401, 'Invalid Paystack webhook signature.', 'INVALID_SIGNATURE')
     }
 
-    console.info(
-      JSON.stringify({
-        event: 'paystack.webhook.stub_received',
-        bytes: rawBody.length,
-      }),
-    )
+    let payload: PaystackWebhookPayload
+    try {
+      payload = JSON.parse(rawBody) as PaystackWebhookPayload
+    } catch {
+      return jsonError(400, 'Malformed webhook JSON payload.', 'INVALID_JSON')
+    }
 
-    return NextResponse.json(
-      {
-        error:
-          'Paystack webhook handler is stubbed pending Agent 4 handoff (TODO(HANDOFF-TO-AGENT-4)).',
-        code: 'AGENT_4_STUB',
-      },
-      { status: 501 },
-    )
+    const eventType = payload.event ?? 'unknown'
+    const data = payload.data ?? {}
+    const paystackRef = data.reference ?? ''
+    const orderRef = data.metadata?.orderReference || paystackRef
+    const paystackEventId = `${eventType}:${data.id ?? paystackRef ?? Date.now()}`
+
+    // Locate the matching order by paystackRef or reference
+    const order = orderRef
+      ? await prisma.order.findFirst({
+          where: {
+            OR: [{ paystackRef }, { reference: orderRef }],
+          },
+          include: {
+            user: { select: { name: true, email: true, phone: true } },
+            items: true,
+          },
+        })
+      : null
+
+    // Idempotent insert of PaymentEvent
+    try {
+      await prisma.paymentEvent.create({
+        data: {
+          paystackEventId,
+          orderId: order?.id ?? null,
+          type: eventType,
+          payload: payload as unknown as Prisma.InputJsonValue,
+        },
+      })
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+        // Duplicate webhook delivery — already processed
+        return NextResponse.json({ received: true, duplicate: true })
+      }
+      throw err
+    }
+
+    if (!order) {
+      console.warn(
+        JSON.stringify({
+          event: 'paystack.webhook.order_not_found',
+          eventType,
+          paystackRef,
+          orderRef,
+        }),
+      )
+      return NextResponse.json({ received: true })
+    }
+
+    if (eventType === 'charge.success') {
+      const paidAmount = Number(data.amount ?? 0)
+      const currency = String(data.currency ?? '').toUpperCase()
+
+      if (paidAmount !== order.totalKobo || (currency && currency !== 'NGN')) {
+        console.error(
+          JSON.stringify({
+            event: 'paystack.webhook.amount_mismatch',
+            reference: order.reference,
+            expectedKobo: order.totalKobo,
+            receivedKobo: paidAmount,
+            currency,
+          }),
+        )
+        return NextResponse.json({ received: true, mismatch: true })
+      }
+
+      if (order.status === 'paid' || order.status === 'fulfilled' || order.status === 'refunded') {
+        return NextResponse.json({ received: true, alreadyPaid: true })
+      }
+
+      const paidAt = data.paid_at ? new Date(data.paid_at) : new Date()
+
+      const updatedOrder = await prisma.$transaction(async (tx) => {
+        const updated = await tx.order.update({
+          where: { id: order.id },
+          data: {
+            status: 'paid',
+            paidAt,
+            paystackRef: paystackRef || order.paystackRef,
+          },
+          include: {
+            user: { select: { name: true, email: true, phone: true } },
+            items: true,
+          },
+        })
+
+        // Decrement tracked variant stock (never below 0)
+        for (const item of updated.items) {
+          await tx.$executeRaw`
+            UPDATE public.product_variants
+            SET stock_qty = GREATEST(stock_qty - ${item.qty}, 0)
+            WHERE id = ${item.variantId}
+              AND stock_qty IS NOT NULL
+          `
+        }
+
+        // Clear the customer's cart
+        const userCart = await tx.cart.findUnique({
+          where: { userId: order.userId },
+          select: { id: true },
+        })
+        if (userCart) {
+          await tx.cartItem.deleteMany({ where: { cartId: userCart.id } })
+        }
+
+        return updated
+      })
+
+      const fullOrder: FullOrder = updatedOrder
+      await Promise.allSettled([
+        notifier.notifyPaidOrder(fullOrder),
+        emails.sendReceipt(fullOrder),
+      ])
+
+      return NextResponse.json({ received: true, status: 'paid' })
+    }
+
+    if (eventType === 'charge.failed' && order.status === 'pending') {
+      const failedOrder = await prisma.order.update({
+        where: { id: order.id },
+        data: { status: 'failed' },
+        include: {
+          user: { select: { name: true, email: true, phone: true } },
+          items: true,
+        },
+      })
+
+      await notifier.notifyFailedOrder(failedOrder)
+      return NextResponse.json({ received: true, status: 'failed' })
+    }
+
+    return NextResponse.json({ received: true })
   } catch (err) {
     return handleRouteError(err, 'paystack/webhook:POST')
   }

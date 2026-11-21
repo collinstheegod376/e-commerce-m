@@ -18,9 +18,14 @@ export class ApiError extends Error {
   }
 }
 
-export function jsonError(status: number, error: string, code?: string) {
+export function jsonError(
+  status: number,
+  error: string,
+  code?: string,
+  headers?: HeadersInit,
+) {
   const body: ApiErrorBody = code ? { error, code } : { error }
-  return NextResponse.json(body, { status })
+  return NextResponse.json(body, headers ? { status, headers } : { status })
 }
 
 export function handleRouteError(err: unknown, context?: string) {

@@ -94,7 +94,7 @@ export async function PATCH(
         existing.totalKobo,
       )
       if (!refundResult.ok) {
-        throw new ApiError(501, refundResult.message, 'AGENT_4_STUB')
+        throw new ApiError(502, refundResult.message, 'PAYSTACK_REFUND_FAILED')
       }
       refundMeta = refundResult
     }
