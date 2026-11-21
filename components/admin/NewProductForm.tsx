@@ -1,0 +1,280 @@
+'use client'
+
+import { FormEvent, useState } from 'react'
+import { useRouter } from 'next/navigation'
+
+interface VariantDraft {
+  size: string
+  sku: string
+  stockQty: string // empty string -> null (untracked)
+}
+
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+export function NewProductForm() {
+  const router = useRouter()
+  const [name, setName] = useState('')
+  const [slug, setSlug] = useState('')
+  const [slugTouched, setSlugTouched] = useState(false)
+  const [description, setDescription] = useState('')
+  const [priceNaira, setPriceNaira] = useState('')
+  const [imagesText, setImagesText] = useState('/assets/hoodie-urban-legacy.jpg')
+  const [active, setActive] = useState(true)
+  const [variants, setVariants] = useState<VariantDraft[]>([
+    { size: 'S', sku: '', stockQty: '10' },
+    { size: 'M', sku: '', stockQty: '10' },
+    { size: 'L', sku: '', stockQty: '10' },
+    { size: 'XL', sku: '', stockQty: '10' },
+  ])
+
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+
+  function handleNameChange(value: string) {
+    setName(value)
+    if (!slugTouched) {
+      setSlug(slugify(value))
+    }
+  }
+
+  function updateVariant(idx: number, field: keyof VariantDraft, value: string) {
+    setVariants((prev) =>
+      prev.map((row, i) => (i === idx ? { ...row, [field]: value } : row)),
+    )
+  }
+
+  function addVariantRow() {
+    setVariants((prev) => [...prev, { size: '', sku: '', stockQty: '' }])
+  }
+
+  function removeVariantRow(idx: number) {
+    setVariants((prev) => prev.filter((_, i) => i !== idx))
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError('')
+
+    const parsedNaira = Number(priceNaira)
+    if (!Number.isFinite(parsedNaira) || parsedNaira <= 0) {
+      setError('Enter a valid price in Naira (₦).')
+      return
+    }
+
+    const images = imagesText
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+
+    const payloadVariants = variants
+      .filter((v) => v.size.trim().length > 0)
+      .map((v) => ({
+        size: v.size.trim(),
+        sku: v.sku.trim() || null,
+        stockQty: v.stockQty.trim() === '' ? null : Number(v.stockQty),
+      }))
+
+    setSubmitting(true)
+    try {
+      const res = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          slug: slug.trim(),
+          description: description.trim() || null,
+          priceNaira: parsedNaira, // converted to kobo server-side
+          images,
+          active,
+          variants: payloadVariants,
+        }),
+      })
+      const data = (await res.json()) as { product?: { id: string }; error?: string }
+      if (!res.ok) {
+        setError(data.error || 'Could not create product.')
+        setSubmitting(false)
+        return
+      }
+      router.push(`/admin/products/${data.product?.id ?? ''}`)
+      router.refresh()
+    } catch {
+      setError('Network error while creating product.')
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {error ? (
+        <div
+          role="alert"
+          className="border-l-2 border-[#ff5331] bg-[#fff5f2] px-4 py-3 text-xs text-[#030304]"
+        >
+          {error}
+        </div>
+      ) : null}
+
+      <div className="border border-[#e2e2de] bg-white p-6 space-y-5">
+        <h2 className="text-sm font-bold uppercase tracking-[0.06em]">Product Details</h2>
+
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          <label className="block">
+            <span className="block text-[11px] uppercase tracking-[0.06em] text-[#6a6a6a]">
+              Name *
+            </span>
+            <input
+              required
+              value={name}
+              onChange={(e) => handleNameChange(e.target.value)}
+              placeholder="Lekki Heavyweight Cargo"
+              className="mt-1.5 w-full border border-[#d6d6d6] px-3 py-2 text-xs outline-none focus:border-[#030304]"
+            />
+          </label>
+
+          <label className="block">
+            <span className="block text-[11px] uppercase tracking-[0.06em] text-[#6a6a6a]">
+              Slug * (auto-generated from name)
+            </span>
+            <input
+              required
+              value={slug}
+              onChange={(e) => {
+                setSlugTouched(true)
+                setSlug(e.target.value)
+              }}
+              placeholder="lekki-heavyweight-cargo"
+              className="mt-1.5 w-full border border-[#d6d6d6] px-3 py-2 font-mono text-xs outline-none focus:border-[#030304]"
+            />
+          </label>
+
+          <label className="block">
+            <span className="block text-[11px] uppercase tracking-[0.06em] text-[#6a6a6a]">
+              Price in Naira (₦) *
+            </span>
+            <input
+              required
+              type="number"
+              step="0.01"
+              min="1"
+              value={priceNaira}
+              onChange={(e) => setPriceNaira(e.target.value)}
+              placeholder="75000"
+              className="mt-1.5 w-full border border-[#d6d6d6] px-3 py-2 text-xs outline-none focus:border-[#030304]"
+            />
+            <span className="mt-1 block text-[11px] text-[#757575]">
+              Converted to integer kobo server-side.
+            </span>
+          </label>
+
+          <label className="flex items-center gap-2.5 pt-6 text-xs font-medium text-[#030304]">
+            <input
+              type="checkbox"
+              checked={active}
+              onChange={(e) => setActive(e.target.checked)}
+              className="h-4 w-4 accent-[#030304]"
+            />
+            <span>Active on storefront immediately</span>
+          </label>
+        </div>
+
+        <label className="block">
+          <span className="block text-[11px] uppercase tracking-[0.06em] text-[#6a6a6a]">
+            Description
+          </span>
+          <textarea
+            rows={4}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Fabric weight, cut, construction details…"
+            className="mt-1.5 w-full border border-[#d6d6d6] px-3 py-2 text-xs outline-none focus:border-[#030304]"
+          />
+        </label>
+
+        <label className="block">
+          <span className="block text-[11px] uppercase tracking-[0.06em] text-[#6a6a6a]">
+            Image URLs (one per line)
+          </span>
+          <textarea
+            rows={3}
+            value={imagesText}
+            onChange={(e) => setImagesText(e.target.value)}
+            placeholder="/assets/hoodie-urban-legacy.jpg"
+            className="mt-1.5 w-full border border-[#d6d6d6] px-3 py-2 font-mono text-xs outline-none focus:border-[#030304]"
+          />
+        </label>
+      </div>
+
+      {/* Initial Variants */}
+      <div className="border border-[#e2e2de] bg-white p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-bold uppercase tracking-[0.06em]">
+              Initial Variants &amp; Sizes
+            </h2>
+            <p className="mt-0.5 text-[11px] text-[#757575]">
+              Leave stock blank for untracked availability. Set 0 for out of stock.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={addVariantRow}
+            className="border border-[#030304] px-3 py-1.5 text-xs font-medium uppercase tracking-[0.05em] hover:bg-[#030304] hover:text-white"
+          >
+            + Add Size
+          </button>
+        </div>
+
+        <div className="space-y-2.5">
+          {variants.map((row, idx) => (
+            <div key={idx} className="grid grid-cols-12 gap-2 items-center">
+              <input
+                value={row.size}
+                onChange={(e) => updateVariant(idx, 'size', e.target.value)}
+                placeholder="Size (e.g. M, One Size)"
+                className="col-span-4 border border-[#d6d6d6] px-3 py-2 text-xs outline-none focus:border-[#030304]"
+              />
+              <input
+                value={row.sku}
+                onChange={(e) => updateVariant(idx, 'sku', e.target.value)}
+                placeholder="SKU (optional)"
+                className="col-span-4 border border-[#d6d6d6] px-3 py-2 font-mono text-xs outline-none focus:border-[#030304]"
+              />
+              <input
+                type="number"
+                min="0"
+                value={row.stockQty}
+                onChange={(e) => updateVariant(idx, 'stockQty', e.target.value)}
+                placeholder="Stock (blank = untracked)"
+                className="col-span-3 border border-[#d6d6d6] px-3 py-2 text-xs outline-none focus:border-[#030304]"
+              />
+              <button
+                type="button"
+                onClick={() => removeVariantRow(idx)}
+                className="col-span-1 text-xs text-[#757575] hover:text-red-700"
+                aria-label="Remove variant"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={submitting}
+          className="bg-[#030304] px-6 py-3 text-xs font-medium uppercase tracking-[0.06em] text-white hover:bg-[#1f1f22] disabled:opacity-50"
+        >
+          {submitting ? 'Creating Product…' : 'Create Product'}
+        </button>
+      </div>
+    </form>
+  )
+}
