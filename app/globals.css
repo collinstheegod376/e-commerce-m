@@ -12,9 +12,12 @@
 }
 
 :root {
+  --font-sans: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-display: 'Syne', system-ui, sans-serif;
+  --font-brush: 'Permanent Marker', cursive, sans-serif;
   color: #f8fafc;
   background: #01121a;
-  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
   font-synthesis: none;
   color-scheme: dark;
 }
