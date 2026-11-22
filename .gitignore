@@ -16,3 +16,8 @@ logs/
 /.figma/design-context/
 /.plugins/
 /.opencode-skills/
+/3d designs/
+*.glb
+*.obj
+*.mtl
+Maison_Kriss_Backend_Documentation_Aigbona_Collins.pdf
