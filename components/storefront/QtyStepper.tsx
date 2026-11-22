@@ -21,13 +21,13 @@ export function QtyStepper({
   const canIncrease = !disabled && (max === null || value < max)
 
   return (
-    <div className="quantity-stepper inline-flex bg-white">
+    <div className="quantity-stepper inline-flex">
       <button
         type="button"
         disabled={!canDecrease}
         onClick={() => onChange(value - 1)}
         aria-label={`Decrease quantity of ${itemLabel}`}
-        className="disabled:opacity-35 disabled:cursor-not-allowed hover:bg-[#f5f5f2]"
+        className="transition-colors disabled:cursor-not-allowed disabled:opacity-35"
       >
         −
       </button>
@@ -37,7 +37,7 @@ export function QtyStepper({
         disabled={!canIncrease}
         onClick={() => onChange(value + 1)}
         aria-label={`Increase quantity of ${itemLabel}`}
-        className="disabled:opacity-35 disabled:cursor-not-allowed hover:bg-[#f5f5f2]"
+        className="transition-colors disabled:cursor-not-allowed disabled:opacity-35"
       >
         +
       </button>

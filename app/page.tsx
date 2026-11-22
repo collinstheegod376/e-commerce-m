@@ -26,7 +26,7 @@ export default async function HomePage() {
   const cartCount = cart.items.reduce((sum, item) => sum + item.qty, 0)
 
   return (
-    <main className="relative bg-white">
+    <main className="relative min-h-screen bg-[#01121a] text-[#f8fafc]">
       <StorefrontHeader
         initialCartCount={cartCount}
         isAdmin={user.role === 'admin'}

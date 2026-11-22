@@ -117,7 +117,7 @@ export function CartClient({ initialCart, profileSummary }: CartClientProps) {
       {error ? (
         <div
           role="alert"
-          className="mt-6 border-l-2 border-[#ff5331] bg-[#fff5f2] px-4 py-3 text-sm text-[#030304]"
+          className="mt-6 rounded-lg border-l-4 border-[#ff660c] bg-[#ff660c]/10 px-4 py-3 text-sm text-[#f8fafc]"
         >
           {error}
         </div>
@@ -126,7 +126,7 @@ export function CartClient({ initialCart, profileSummary }: CartClientProps) {
       {notice ? (
         <div
           role="status"
-          className="mt-6 border-l-2 border-[#030304] bg-[#f7f7f5] px-4 py-3 text-sm text-[#030304]"
+          className="mt-6 rounded-lg border-l-4 border-emerald-500 bg-emerald-500/10 px-4 py-3 text-sm text-[#f8fafc]"
         >
           {notice}
         </div>
@@ -167,7 +167,7 @@ export function CartClient({ initialCart, profileSummary }: CartClientProps) {
                 <span>Deliver to</span>
                 <Link
                   href="/profile"
-                  className="border-b border-white pb-0.5 text-[10px] uppercase tracking-[0.06em] text-white"
+                  className="border-b border-[#ff660c] pb-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#ff660c] hover:text-white"
                 >
                   {hasDeliveryInfo ? 'Edit profile' : 'Add details'}
                 </Link>
@@ -194,16 +194,16 @@ export function CartClient({ initialCart, profileSummary }: CartClientProps) {
             >
               {checkoutBusy ? 'Initializing Paystack…' : 'Checkout with Paystack'}
             </button>
-            <small>Final order total & shipping are verified server-side on checkout.</small>
+            <small>Final order total &amp; shipping are verified server-side on checkout.</small>
           </aside>
         </div>
       ) : (
-        <div className="empty-state cart-empty mt-10 border border-[#d6d6d6]">
+        <div className="empty-state cart-empty mt-10">
           <strong>Your cart is empty.</strong>
           <p>Explore our active collection and select your size to begin.</p>
           <Link
             href="/"
-            className="mt-6 border-b border-[#030304] pb-1 text-xs font-medium uppercase tracking-[0.06em]"
+            className="mt-6 border-b border-[#ff660c] pb-1 text-xs font-bold uppercase tracking-[0.16em] text-[#ff660c] hover:text-white"
           >
             Explore the collection
           </Link>

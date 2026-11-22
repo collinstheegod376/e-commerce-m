@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
+import { ShoppingBag } from 'lucide-react'
 import type { CartResponse } from '@/lib/cart'
 
 interface AddToCartProps {
@@ -70,12 +71,12 @@ export function AddToCart({
         onClick={handleAdd}
         className={
           className ??
-          'flex w-full items-center justify-center gap-2.5 bg-[#030304] px-5 py-3.5 text-xs font-medium uppercase tracking-[0.06em] text-white transition-all hover:bg-[#1e1e20] disabled:cursor-not-allowed disabled:opacity-45'
+          'flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#ff660c] px-5 py-3.5 text-xs font-extrabold uppercase tracking-[0.14em] text-[#01121a] transition-all duration-300 hover:bg-[#ff7a2e] hover:shadow-[0_8px_22px_rgba(255,102,12,0.35)] disabled:cursor-not-allowed disabled:opacity-45'
         }
       >
-        <img src="/assets/167f0.svg" alt="" className="h-4 w-3.5" />
+        <ShoppingBag className="h-4 w-4 shrink-0" />
         <span>{loading ? 'Adding…' : label}</span>
-        {priceLabel ? <strong className="text-[11px] opacity-70">{priceLabel}</strong> : null}
+        {priceLabel ? <strong className="text-[11px] opacity-80">· {priceLabel}</strong> : null}
       </button>
 
       {feedback ? (
@@ -83,8 +84,8 @@ export function AddToCart({
           role="status"
           className={
             feedback.type === 'ok'
-              ? 'text-xs text-[#1f9d55]'
-              : 'text-xs text-[#ff5331]'
+              ? 'text-xs font-semibold text-emerald-400'
+              : 'text-xs font-semibold text-[#ff660c]'
           }
         >
           {feedback.text}

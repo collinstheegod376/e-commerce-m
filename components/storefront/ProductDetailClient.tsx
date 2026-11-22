@@ -34,23 +34,25 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
   const maxQty = selectedVariant?.stockQty ?? null
 
   return (
-    <div className="mt-10 grid grid-cols-1 gap-12 lg:grid-cols-12">
+    <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
       {/* Media / 3D Viewer */}
       <div className="lg:col-span-7">
-        <div className="relative flex min-h-[460px] items-center justify-center overflow-hidden border border-[#d6d6d6] bg-[#edf0ed]">
+        <div className="relative flex min-h-[460px] items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-[#072330] to-[#041b26] p-6 shadow-2xl">
           {show3D && meta.modelUrl ? (
             <ModelViewer
               src={meta.modelUrl}
               poster={product.images[0]}
               alt={product.name}
-              className="hero-image hero-3d !static !h-[520px] !w-full"
+              className="hero-3d relative !h-[500px] !w-full"
             />
           ) : (
-            <img
-              src={product.images[activeImageIdx] ?? '/assets/57c8a.png'}
-              alt={product.name}
-              className="max-h-[520px] w-full object-contain p-8 mix-blend-darken"
-            />
+            <div className="flex h-[480px] w-full items-center justify-center rounded-xl bg-slate-100 p-6">
+              <img
+                src={product.images[activeImageIdx] ?? '/assets/57c8a.png'}
+                alt={product.name}
+                className="max-h-full w-full object-contain mix-blend-multiply"
+              />
+            </div>
           )}
         </div>
 
@@ -59,13 +61,13 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
             <button
               type="button"
               onClick={() => setShow3D(true)}
-              className={`border px-3.5 py-2 text-xs uppercase tracking-[0.06em] ${
+              className={`rounded-lg border px-4 py-2.5 text-xs font-bold uppercase tracking-[0.14em] transition-all ${
                 show3D
-                  ? 'border-[#030304] bg-[#030304] text-white'
-                  : 'border-[#d6d6d6] bg-white text-[#030304]'
+                  ? 'border-[#ff660c] bg-[#ff660c] text-[#01121a] shadow-[0_0_16px_rgba(255,102,12,0.35)]'
+                  : 'border-white/15 bg-[#041b26] text-slate-200 hover:border-[#ff660c] hover:text-[#ff660c]'
               }`}
             >
-              3D Model
+              3D Studio View
             </button>
           ) : null}
 
@@ -77,13 +79,17 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                 setShow3D(false)
                 setActiveImageIdx(idx)
               }}
-              className={`h-16 w-16 overflow-hidden border bg-[#edf0ed] p-1 ${
+              className={`h-16 w-16 overflow-hidden rounded-lg border bg-slate-100 p-1.5 transition-all ${
                 !show3D && activeImageIdx === idx
-                  ? 'border-[#030304]'
-                  : 'border-[#d6d6d6] opacity-75 hover:opacity-100'
+                  ? 'border-2 border-[#ff660c] ring-2 ring-[#ff660c]/30'
+                  : 'border-white/15 opacity-75 hover:opacity-100'
               }`}
             >
-              <img src={imgUrl} alt="" className="h-full w-full object-contain mix-blend-darken" />
+              <img
+                src={imgUrl}
+                alt=""
+                className="h-full w-full object-contain mix-blend-multiply"
+              />
             </button>
           ))}
         </div>
@@ -92,20 +98,24 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
       {/* Info & Controls */}
       <div className="flex flex-col lg:col-span-5">
         <p className="page-kicker">{meta.eyebrow}</p>
-        <h1 className="mt-2 text-[clamp(2.5rem,5vw,4.2rem)] font-bold leading-[0.95] tracking-[-0.06em] text-[#030304]">
+        <h1 className="mt-3 font-brush text-[clamp(2.5rem,5vw,4.3rem)] uppercase leading-[1.02] tracking-[0.02em] text-[#f8fafc]">
           {product.name}
         </h1>
-        <p className="mt-4 text-2xl font-bold tracking-[-0.03em] text-[#030304]">
+        <p className="mt-4 text-2xl font-extrabold tracking-tight text-[#ff660c]">
           {formatNairaCompact(product.priceKobo)}
         </p>
 
         {product.description ? (
-          <p className="mt-6 text-sm leading-[1.8] text-[#5a5a5a]">{product.description}</p>
+          <p className="mt-6 text-sm leading-[1.85] text-slate-300 sm:text-base">
+            {product.description}
+          </p>
         ) : null}
 
-        <div className="mt-8 space-y-6 border-t border-[#d6d6d6] pt-6">
+        <div className="mt-8 space-y-6 rounded-2xl border border-white/12 bg-[#041b26]/90 p-6">
           <div>
-            <p className="mb-3 text-xs uppercase tracking-[0.08em] text-[#6a6a6a]">Select Size</p>
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+              Select Size
+            </p>
             <SizeSelector
               variants={product.variants}
               selectedId={selectedVariantId}
@@ -117,7 +127,9 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
           </div>
 
           <div>
-            <p className="mb-3 text-xs uppercase tracking-[0.08em] text-[#6a6a6a]">Quantity</p>
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+              Quantity
+            </p>
             <QtyStepper
               value={qty}
               min={1}
@@ -138,19 +150,23 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
             />
           </div>
 
-          <div className="flex items-center justify-between pt-2 text-xs text-[#6a6a6a]">
-            <Link className="underline underline-offset-4 hover:text-[#030304]" href="/cart">
+          <div className="flex items-center justify-between border-t border-white/10 pt-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-300">
+            <Link className=" transition-colors hover:text-[#ff660c]" href="/cart">
               View Cart →
             </Link>
-            <Link className="underline underline-offset-4 hover:text-[#030304]" href="/">
+            <Link className="transition-colors hover:text-[#ff660c]" href="/">
               ← Back to Collection
             </Link>
           </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-2 gap-px bg-[#d6d6d6] border border-[#d6d6d6]">
-          {meta.features.map((feat) => (
-            <div key={feat} className="bg-white p-3.5 text-xs font-semibold text-[#3a3a3a]">
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          {meta.features.map((feat, idx) => (
+            <div
+              key={feat}
+              className="rounded-xl border border-white/10 bg-[#041b26]/70 p-3.5 text-xs font-semibold text-slate-200"
+            >
+              <span className="mr-2 text-[10px] font-bold text-[#ff660c]">0{idx + 1}</span>
               {feat}
             </div>
           ))}

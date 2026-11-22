@@ -67,10 +67,10 @@ function SignupFormInner() {
       <div className="flex flex-col">
         <p className="page-kicker">Verification required</p>
         <h2>Check your email</h2>
-        <p className="mb-8 text-sm leading-relaxed text-[#4a4a4a]">{confirmMessage}</p>
-        <p className="mb-8 border-l-2 border-[#030304] bg-[#f7f7f5] px-4 py-3 text-xs leading-relaxed text-[#4a4a4a]">
-          We sent a confirmation link to <strong>{email}</strong>. Open the email and follow the
-          link to activate your Maison Kriss membership.
+        <p className="mb-6 text-sm leading-relaxed text-slate-300">{confirmMessage}</p>
+        <p className="mb-8 rounded-lg border-l-4 border-[#ff660c] bg-[#ff660c]/10 px-4 py-3 text-xs leading-relaxed text-slate-200">
+          We sent a confirmation link to <strong className="text-[#ff660c]">{email}</strong>. Open
+          the email and follow the link to activate your Maison Kriss membership.
         </p>
         <Link className="primary-action text-center" href="/login">
           Return to sign in
@@ -87,7 +87,7 @@ function SignupFormInner() {
       {error ? (
         <div
           role="alert"
-          className="mb-6 border-l-2 border-[#ff5331] bg-[#fff5f2] px-4 py-3 text-sm text-[#030304]"
+          className="mb-6 rounded-lg border-l-4 border-[#ff660c] bg-[#ff660c]/15 px-4 py-3 text-sm text-[#f8fafc]"
         >
           {error}
         </div>
@@ -137,8 +137,8 @@ function SignupFormInner() {
         {submitting ? 'Creating account…' : 'Create account'}
       </button>
 
-      <div className="mt-6 text-xs text-[#6a6a6a]">
-        <Link className="underline underline-offset-4 hover:text-[#030304]" href="/login">
+      <div className="mt-6 text-xs text-slate-400">
+        <Link className="underline underline-offset-4 transition-colors hover:text-[#ff660c]" href="/login">
           Already a member? Sign in
         </Link>
       </div>
@@ -153,7 +153,7 @@ export default function SignupPage() {
       headline="Join the archive."
       subcopy="Create your member account to unlock the Maison Kriss catalog, save delivery addresses, and receive order dispatches."
     >
-      <Suspense fallback={<p className="text-sm text-[#6a6a6a]">Loading sign-up…</p>}>
+      <Suspense fallback={<p className="text-sm text-slate-400">Loading sign-up…</p>}>
         <SignupFormInner />
       </Suspense>
     </AuthEditorialShell>

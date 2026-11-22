@@ -46,13 +46,13 @@ export function SizeSelector({
               disabled={outOfStock}
               onClick={() => onSelect(variant.id)}
               className={[
-                'border transition-colors text-xs font-medium',
-                compact ? 'px-2.5 py-1' : 'px-3.5 py-2',
+                'rounded-md border transition-all duration-200 text-xs font-bold uppercase tracking-[0.08em]',
+                compact ? 'px-2.5 py-1.5' : 'px-4 py-2.5',
                 outOfStock
-                  ? 'border-[#e5e5e5] bg-[#f7f7f5] text-[#a3a3a3] line-through cursor-not-allowed'
+                  ? 'border-white/10 bg-[#01121a]/60 text-slate-600 line-through cursor-not-allowed'
                   : isSelected
-                    ? 'border-[#030304] bg-[#030304] text-white'
-                    : 'border-[#d6d6d6] bg-white text-[#030304] hover:border-[#030304]',
+                    ? 'border-[#ff660c] bg-[#ff660c] text-[#01121a] shadow-[0_0_12px_rgba(255,102,12,0.35)]'
+                    : 'border-white/15 bg-[#01121a] text-slate-200 hover:border-[#ff660c] hover:text-[#ff660c]',
               ].join(' ')}
               title={
                 outOfStock
@@ -72,8 +72,8 @@ export function SizeSelector({
         <p
           className={
             stockInfo.tone === 'out'
-              ? 'text-xs font-medium text-[#b91c1c]'
-              : 'text-xs font-medium text-[#ff5331]'
+              ? 'text-xs font-semibold text-red-400'
+              : 'text-xs font-semibold text-[#ff660c]'
           }
         >
           {stockInfo.text}

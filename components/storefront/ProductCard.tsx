@@ -38,12 +38,14 @@ export function ProductCard({ product, index }: ProductCardProps) {
   const heroImg = product.images[0] ?? null
 
   return (
-    <article className="flex flex-col bg-white p-6 transition-colors hover:bg-[#fafaf8]">
-      <div className="flex items-center justify-between text-xs text-[#6a6a6a]">
-        <span className="uppercase tracking-[0.06em]">
+    <article className="group flex flex-col rounded-2xl border border-white/12 bg-[#041b26]/90 p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-[#ff660c]/60 hover:bg-[#072330] hover:shadow-[0_16px_40px_rgba(0,0,0,0.45)]">
+      <div className="flex items-center justify-between text-xs">
+        <span className="rounded-full border border-[#ff660c]/35 bg-[#ff660c]/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#ff660c]">
           {meta.modelUrl ? '3D Interactive' : 'Archive Piece'}
         </span>
-        <span className="font-bold">{String(index + 1).padStart(2, '0')}</span>
+        <span className="font-brush text-base text-slate-400 group-hover:text-[#ff660c]">
+          {String(index + 1).padStart(2, '0')}
+        </span>
       </div>
 
       <Link
@@ -57,19 +59,22 @@ export function ProductCard({ product, index }: ProductCardProps) {
         )}
       </Link>
 
-      <div className="mb-4 flex-1">
+      <div className="mb-5 flex-1">
         <span className="result-meta">{meta.eyebrow}</span>
-        <Link href={`/products/${product.slug}`} className="mt-1 block hover:underline">
-          <h3 className="text-xl font-bold tracking-[-0.04em] text-[#030304]">
+        <Link
+          href={`/products/${product.slug}`}
+          className="mt-1.5 block transition-colors group-hover:text-[#ff660c]"
+        >
+          <h3 className="font-brush text-2xl uppercase tracking-[0.02em] text-[#f8fafc] transition-colors group-hover:text-[#ff660c]">
             {product.name}
           </h3>
         </Link>
-        <p className="mt-1 text-sm font-semibold text-[#030304]">
+        <p className="mt-2 text-base font-extrabold text-[#ff660c]">
           {formatNairaCompact(product.priceKobo)}
         </p>
       </div>
 
-      <div className="space-y-3 border-t border-[#ecece8] pt-4">
+      <div className="space-y-3.5 border-t border-white/10 pt-4">
         <SizeSelector
           variants={product.variants}
           selectedId={selectedVariantId}

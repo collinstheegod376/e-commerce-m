@@ -59,7 +59,7 @@ function LoginFormInner() {
       {error ? (
         <div
           role="alert"
-          className="mb-6 border-l-2 border-[#ff5331] bg-[#fff5f2] px-4 py-3 text-sm text-[#030304]"
+          className="mb-6 rounded-lg border-l-4 border-[#ff660c] bg-[#ff660c]/15 px-4 py-3 text-sm text-[#f8fafc]"
         >
           {error}
         </div>
@@ -96,12 +96,12 @@ function LoginFormInner() {
         {submitting ? 'Signing in…' : 'Sign in'}
       </button>
 
-      <div className="mt-6 flex flex-col gap-3 text-xs text-[#6a6a6a]">
-        <Link className="underline underline-offset-4 hover:text-[#030304]" href="/forgot-password">
+      <div className="mt-6 flex flex-col gap-3 text-xs text-slate-400">
+        <Link className="underline underline-offset-4 transition-colors hover:text-[#ff660c]" href="/forgot-password">
           Forgot your password?
         </Link>
         <Link
-          className="underline underline-offset-4 hover:text-[#030304]"
+          className="underline underline-offset-4 transition-colors hover:text-[#ff660c]"
           href={nextPath !== '/' ? `/signup?next=${encodeURIComponent(nextPath)}` : '/signup'}
         >
           New to Maison Kriss? Create an account
@@ -118,7 +118,7 @@ export default function LoginPage() {
       headline="Wear it your way."
       subcopy="Private access to the Maison Kriss archive. Sign in to inspect 3D pieces, manage your fit, and reserve numbered drops."
     >
-      <Suspense fallback={<p className="text-sm text-[#6a6a6a]">Loading sign-in…</p>}>
+      <Suspense fallback={<p className="text-sm text-slate-400">Loading sign-in…</p>}>
         <LoginFormInner />
       </Suspense>
     </AuthEditorialShell>

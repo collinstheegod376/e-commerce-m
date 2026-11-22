@@ -30,7 +30,6 @@ export default function ForgotPasswordPage() {
         setSubmitting(false)
         return
       }
-      // Always display the exact same success message regardless of whether the email exists
       setSubmitted(true)
     } catch {
       setError('Network error. Please try again.')
@@ -52,14 +51,14 @@ export default function ForgotPasswordPage() {
         {error ? (
           <div
             role="alert"
-            className="mb-6 border-l-2 border-[#ff5331] bg-[#fff5f2] px-4 py-3 text-sm text-[#030304]"
+            className="mb-6 rounded-lg border-l-4 border-[#ff660c] bg-[#ff660c]/15 px-4 py-3 text-sm text-[#f8fafc]"
           >
             {error}
           </div>
         ) : null}
 
         {submitted ? (
-          <div className="mb-6 border-l-2 border-[#030304] bg-[#f7f7f5] px-4 py-4 text-sm leading-relaxed text-[#030304]">
+          <div className="mb-6 rounded-lg border-l-4 border-[#ff660c] bg-[#ff660c]/10 px-4 py-4 text-sm leading-relaxed text-[#f8fafc]">
             {NEUTRAL_MESSAGE}
           </div>
         ) : (
@@ -87,8 +86,8 @@ export default function ForgotPasswordPage() {
           </>
         )}
 
-        <div className="mt-6 text-xs text-[#6a6a6a]">
-          <Link className="underline underline-offset-4 hover:text-[#030304]" href="/login">
+        <div className="mt-6 text-xs text-slate-400">
+          <Link className="underline underline-offset-4 transition-colors hover:text-[#ff660c]" href="/login">
             ← Back to sign in
           </Link>
         </div>
