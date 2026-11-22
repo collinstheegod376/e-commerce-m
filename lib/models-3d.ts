@@ -13,7 +13,6 @@ export interface ProductEditorialMeta {
 const EDITORIAL_BY_SLUG: Record<string, ProductEditorialMeta> = {
   'maison-kriss-tank-top': {
     eyebrow: 'Essential Streetwear / 01',
-    modelUrl: '/assets/maison-kriss-tank-top.glb',
     features: ['Heavyweight Cotton', 'Relaxed Cut', 'Reinforced Neckline', 'Everyday Layer'],
     badge: 'New',
   },
@@ -28,7 +27,6 @@ const EDITORIAL_BY_SLUG: Record<string, ProductEditorialMeta> = {
   },
   'maison-kriss-jorts': {
     eyebrow: 'Denim Uniform / 03',
-    modelUrl: '/assets/maison-kriss-jorts.glb',
     features: ['Rigid Washed Denim', 'Longline Silhouette', 'Utility Pockets', 'Built To Last'],
   },
   'truth-seeker-tee': {
