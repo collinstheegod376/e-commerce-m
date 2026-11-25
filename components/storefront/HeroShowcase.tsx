@@ -9,7 +9,6 @@ import {
   ChevronDown,
   Eye,
   Search,
-  Sparkles,
   X,
 } from 'lucide-react'
 import { formatNairaCompact } from '@/lib/money'
@@ -216,8 +215,7 @@ export function HeroShowcase({ products }: HeroShowcaseProps) {
               >
                 <div>
                   {/* Subheading / Eyebrow */}
-                  <div className="inline-flex items-center gap-2 rounded-full border border-[#ff660c]/35 bg-[#ff660c]/10 px-3.5 py-1.5">
-                    <Sparkles className="h-3.5 w-3.5 text-[#ff660c]" />
+                  <div className="inline-flex items-center rounded-full border border-[#ff660c]/35 bg-[#ff660c]/10 px-3.5 py-1.5">
                     <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#ff660c]">
                       {activeMeta.eyebrow}
                     </p>
