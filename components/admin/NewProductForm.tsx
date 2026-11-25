@@ -2,12 +2,18 @@
 
 import { FormEvent, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import {
+  MIN_PRODUCT_IMAGES,
+  ProductImageUploader,
+} from '@/components/admin/ProductImageUploader'
 
 interface VariantDraft {
   size: string
   sku: string
   stockQty: string // empty string -> null (untracked)
 }
+
+const SIZE_PRESETS = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'One Size'] as const
 
 function slugify(input: string): string {
   return input
@@ -24,7 +30,7 @@ export function NewProductForm() {
   const [slugTouched, setSlugTouched] = useState(false)
   const [description, setDescription] = useState('')
   const [priceNaira, setPriceNaira] = useState('')
-  const [imagesText, setImagesText] = useState('/assets/hoodie-urban-legacy.jpg')
+  const [images, setImages] = useState<string[]>([])
   const [active, setActive] = useState(true)
   const [variants, setVariants] = useState<VariantDraft[]>([
     { size: 'S', sku: '', stockQty: '10' },
@@ -49,13 +55,29 @@ export function NewProductForm() {
     )
   }
 
-  function addVariantRow() {
-    setVariants((prev) => [...prev, { size: '', sku: '', stockQty: '' }])
+  function addVariantRow(presetSize = '') {
+    setVariants((prev) => [
+      ...prev,
+      { size: presetSize, sku: '', stockQty: presetSize ? '10' : '' },
+    ])
+  }
+
+  function toggleSizePreset(preset: string) {
+    const exists = variants.some(
+      (v) => v.size.trim().toLowerCase() === preset.toLowerCase(),
+    )
+    if (exists) return
+    addVariantRow(preset)
   }
 
   function removeVariantRow(idx: number) {
     setVariants((prev) => prev.filter((_, i) => i !== idx))
   }
+
+  const totalTrackedPieces = variants.reduce((sum, v) => {
+    const n = Number(v.stockQty)
+    return v.stockQty.trim() !== '' && Number.isFinite(n) && n >= 0 ? sum + n : sum
+  }, 0)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -67,10 +89,13 @@ export function NewProductForm() {
       return
     }
 
-    const images = imagesText
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean)
+    const cleanedImages = images.map((url) => url.trim()).filter(Boolean)
+    if (cleanedImages.length < MIN_PRODUCT_IMAGES) {
+      setError(
+        'Upload 1 main image and at least 4 additional inspection images (5 total) before creating this product.',
+      )
+      return
+    }
 
     const payloadVariants = variants
       .filter((v) => v.size.trim().length > 0)
@@ -90,7 +115,7 @@ export function NewProductForm() {
           slug: slug.trim(),
           description: description.trim() || null,
           priceNaira: parsedNaira, // converted to kobo server-side
-          images,
+          images: cleanedImages,
           active,
           variants: payloadVariants,
         }),
@@ -195,39 +220,75 @@ export function NewProductForm() {
             className="mt-1.5 w-full border border-[#d6d6d6] px-3 py-2 text-xs outline-none focus:border-[#030304]"
           />
         </label>
-
-        <label className="block">
-          <span className="block text-[11px] uppercase tracking-[0.06em] text-[#6a6a6a]">
-            Image URLs (one per line)
-          </span>
-          <textarea
-            rows={3}
-            value={imagesText}
-            onChange={(e) => setImagesText(e.target.value)}
-            placeholder="/assets/hoodie-urban-legacy.jpg"
-            className="mt-1.5 w-full border border-[#d6d6d6] px-3 py-2 font-mono text-xs outline-none focus:border-[#030304]"
-          />
-        </label>
       </div>
 
-      {/* Initial Variants */}
+      {/* Product Image Uploader */}
+      <div className="border border-[#e2e2de] bg-white p-6">
+        <ProductImageUploader
+          images={images}
+          onChange={setImages}
+          disabled={submitting}
+        />
+      </div>
+
+      {/* Available Sizes & Pieces Available */}
       <div className="border border-[#e2e2de] bg-white p-6 space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-sm font-bold uppercase tracking-[0.06em]">
-              Initial Variants &amp; Sizes
+              Available Sizes &amp; Pieces Available
             </h2>
             <p className="mt-0.5 text-[11px] text-[#757575]">
-              Leave stock blank for untracked availability. Set 0 for out of stock.
+              Set how many pieces are available per size. Leave Pieces Available blank for untracked stock, or set 0 for out of stock.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={addVariantRow}
-            className="border border-[#030304] px-3 py-1.5 text-xs font-medium uppercase tracking-[0.05em] hover:bg-[#030304] hover:text-white"
-          >
-            + Add Size
-          </button>
+          <div className="flex items-center gap-3">
+            <span className="border border-[#e2e2de] bg-[#fafaf8] px-2.5 py-1 text-[11px] font-semibold text-[#030304]">
+              Total Tracked: {totalTrackedPieces} pcs
+            </span>
+            <button
+              type="button"
+              onClick={() => addVariantRow()}
+              className="border border-[#030304] px-3 py-1.5 text-xs font-medium uppercase tracking-[0.05em] hover:bg-[#030304] hover:text-white"
+            >
+              + Custom Size
+            </button>
+          </div>
+        </div>
+
+        {/* Quick-Add Size Presets */}
+        <div className="flex flex-wrap items-center gap-2 border-y border-[#ecece8] py-3">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#6a6a6a]">
+            Quick-add sizes:
+          </span>
+          {SIZE_PRESETS.map((preset) => {
+            const added = variants.some(
+              (v) => v.size.trim().toLowerCase() === preset.toLowerCase(),
+            )
+            return (
+              <button
+                key={preset}
+                type="button"
+                disabled={added}
+                onClick={() => toggleSizePreset(preset)}
+                className={`border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.04em] transition-colors ${
+                  added
+                    ? 'border-emerald-200 bg-emerald-50 text-emerald-800 cursor-default'
+                    : 'border-[#d6d6d6] bg-white text-[#030304] hover:border-[#030304] hover:bg-[#030304] hover:text-white'
+                }`}
+              >
+                {added ? `✓ ${preset}` : `+ ${preset}`}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Column Headers */}
+        <div className="hidden grid-cols-12 gap-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#6a6a6a] sm:grid">
+          <span className="col-span-4">Available Size</span>
+          <span className="col-span-4">SKU (Optional)</span>
+          <span className="col-span-3">Pieces Available</span>
+          <span className="col-span-1 text-right">Remove</span>
         </div>
 
         <div className="space-y-2.5">
@@ -236,28 +297,31 @@ export function NewProductForm() {
               <input
                 value={row.size}
                 onChange={(e) => updateVariant(idx, 'size', e.target.value)}
-                placeholder="Size (e.g. M, One Size)"
-                className="col-span-4 border border-[#d6d6d6] px-3 py-2 text-xs outline-none focus:border-[#030304]"
+                placeholder="Available Size (e.g. M, One Size)"
+                aria-label="Available Size"
+                className="col-span-12 sm:col-span-4 border border-[#d6d6d6] px-3 py-2 text-xs outline-none focus:border-[#030304]"
               />
               <input
                 value={row.sku}
                 onChange={(e) => updateVariant(idx, 'sku', e.target.value)}
                 placeholder="SKU (optional)"
-                className="col-span-4 border border-[#d6d6d6] px-3 py-2 font-mono text-xs outline-none focus:border-[#030304]"
+                aria-label="SKU"
+                className="col-span-12 sm:col-span-4 border border-[#d6d6d6] px-3 py-2 font-mono text-xs outline-none focus:border-[#030304]"
               />
               <input
                 type="number"
                 min="0"
                 value={row.stockQty}
                 onChange={(e) => updateVariant(idx, 'stockQty', e.target.value)}
-                placeholder="Stock (blank = untracked)"
-                className="col-span-3 border border-[#d6d6d6] px-3 py-2 text-xs outline-none focus:border-[#030304]"
+                placeholder="Pieces Available (blank = untracked)"
+                aria-label="Pieces Available"
+                className="col-span-10 sm:col-span-3 border border-[#d6d6d6] px-3 py-2 text-xs outline-none focus:border-[#030304]"
               />
               <button
                 type="button"
                 onClick={() => removeVariantRow(idx)}
-                className="col-span-1 text-xs text-[#757575] hover:text-red-700"
-                aria-label="Remove variant"
+                className="col-span-2 sm:col-span-1 text-xs text-[#757575] hover:text-red-700"
+                aria-label="Remove size"
               >
                 ✕
               </button>

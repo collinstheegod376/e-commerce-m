@@ -6,6 +6,12 @@ import { isPaystackConfigured, verifyPaystackTransaction } from '@/lib/paystack'
 import { notifier } from '@/lib/notifier'
 import { emails } from '@/lib/emails'
 import { handleRouteError, jsonError } from '@/lib/http'
+import { REALIZED_REVENUE_STATUSES } from '@/lib/order-status'
+
+const PAID_OR_POST_PAID_STATUSES = new Set<string>([
+  ...REALIZED_REVENUE_STATUSES,
+  'refunded',
+])
 
 /**
  * GET /api/orders/[reference]/status -> { status }
@@ -33,6 +39,10 @@ export async function GET(
 
     if (order.userId !== user.id && user.role !== 'admin') {
       return jsonError(403, 'You do not have access to this order.', 'FORBIDDEN')
+    }
+
+    if (PAID_OR_POST_PAID_STATUSES.has(order.status)) {
+      return NextResponse.json({ status: order.status })
     }
 
     if (order.status === 'pending' && isPaystackConfigured()) {
@@ -64,7 +74,16 @@ export async function GET(
           }
 
           if (createdEvent) {
-            const paidOrder = await prisma.$transaction(async (tx) => {
+            const txResult = await prisma.$transaction(async (tx) => {
+              const current = await tx.order.findUnique({
+                where: { id: order.id },
+                select: { status: true },
+              })
+
+              if (current && PAID_OR_POST_PAID_STATUSES.has(current.status)) {
+                return { alreadyProcessed: true as const, status: current.status }
+              }
+
               const updated = await tx.order.update({
                 where: { id: order.id },
                 data: {
@@ -95,12 +114,16 @@ export async function GET(
                 await tx.cartItem.deleteMany({ where: { cartId: userCart.id } })
               }
 
-              return updated
+              return { alreadyProcessed: false as const, order: updated }
             })
 
+            if (txResult.alreadyProcessed) {
+              return NextResponse.json({ status: txResult.status })
+            }
+
             await Promise.allSettled([
-              notifier.notifyPaidOrder(paidOrder),
-              emails.sendReceipt(paidOrder),
+              notifier.notifyPaidOrder(txResult.order),
+              emails.sendReceipt(txResult.order),
             ])
             return NextResponse.json({ status: 'paid' })
           }

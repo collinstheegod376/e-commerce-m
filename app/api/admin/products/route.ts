@@ -27,7 +27,10 @@ const createProductSchema = z
     priceKobo: z.number().int().min(100, 'Price must be at least ₦1').optional(),
     priceNaira: z.number().positive('Price in Naira must be greater than 0').optional(),
     active: z.boolean().optional(),
-    images: z.array(z.string().trim().min(1)).max(12).optional(),
+    images: z
+      .array(z.string().trim().min(1, 'Image URL cannot be empty'))
+      .min(5, 'Upload 1 main image and at least 4 additional inspection images (5 total).')
+      .max(12, 'Maximum 12 product images allowed.'),
     variants: z.array(initialVariantSchema).max(30).optional(),
   })
   .refine((v) => v.priceKobo !== undefined || v.priceNaira !== undefined, {

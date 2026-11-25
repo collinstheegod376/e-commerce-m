@@ -3,6 +3,12 @@
 import { FormEvent, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { formatNaira } from '@/lib/money'
+import {
+  MIN_PRODUCT_IMAGES,
+  ProductImageUploader,
+} from '@/components/admin/ProductImageUploader'
+
+const SIZE_PRESETS = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'One Size'] as const
 
 interface AdminVariant {
   id: string
@@ -33,7 +39,7 @@ export function EditProductClient({ product }: EditProductClientProps) {
   const [slug, setSlug] = useState(product.slug)
   const [description, setDescription] = useState(product.description ?? '')
   const [priceNaira, setPriceNaira] = useState(String(product.priceKobo / 100))
-  const [imagesText, setImagesText] = useState(product.images.join('\n'))
+  const [images, setImages] = useState<string[]>(product.images)
   const [active, setActive] = useState(product.active)
   const [savingProduct, setSavingProduct] = useState(false)
   const [productNotice, setProductNotice] = useState('')
@@ -47,6 +53,11 @@ export function EditProductClient({ product }: EditProductClientProps) {
   const [variantNotice, setVariantNotice] = useState('')
   const [variantError, setVariantError] = useState('')
 
+  const totalTrackedPieces = variants.reduce(
+    (sum, v) => (typeof v.stockQty === 'number' && v.stockQty >= 0 ? sum + v.stockQty : sum),
+    0,
+  )
+
   async function handleSaveProduct(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setProductNotice('')
@@ -55,6 +66,14 @@ export function EditProductClient({ product }: EditProductClientProps) {
     const parsedNaira = Number(priceNaira)
     if (!Number.isFinite(parsedNaira) || parsedNaira <= 0) {
       setProductError('Enter a valid price in Naira (₦).')
+      return
+    }
+
+    const cleanedImages = images.map((url) => url.trim()).filter(Boolean)
+    if (cleanedImages.length < MIN_PRODUCT_IMAGES) {
+      setProductError(
+        'A product must have 1 main image and at least 4 additional inspection images (5 total).',
+      )
       return
     }
 
@@ -69,10 +88,7 @@ export function EditProductClient({ product }: EditProductClientProps) {
           description: description.trim() || null,
           priceNaira: parsedNaira,
           active,
-          images: imagesText
-            .split('\n')
-            .map((l) => l.trim())
-            .filter(Boolean),
+          images: cleanedImages,
         }),
       })
       const data = (await res.json()) as { error?: string }
@@ -109,16 +125,16 @@ export function EditProductClient({ product }: EditProductClientProps) {
       })
       const data = (await res.json()) as { variant?: AdminVariant; error?: string }
       if (!res.ok) {
-        setVariantError(data.error || 'Could not save variant.')
+        setVariantError(data.error || 'Could not save size.')
         return
       }
       if (data.variant) {
         setVariants((prev) => prev.map((v) => (v.id === variantId ? data.variant! : v)))
       }
-      setVariantNotice('Variant updated.')
+      setVariantNotice('Size & inventory updated.')
       router.refresh()
     } catch {
-      setVariantError('Network error saving variant.')
+      setVariantError('Network error saving size.')
     } finally {
       setVariantBusyId(null)
     }
@@ -133,14 +149,14 @@ export function EditProductClient({ product }: EditProductClientProps) {
       const res = await fetch(`/api/admin/variants/${variantId}`, { method: 'DELETE' })
       const data = (await res.json()) as { error?: string }
       if (!res.ok) {
-        setVariantError(data.error || 'Could not remove variant.')
+        setVariantError(data.error || 'Could not remove size.')
         return
       }
       setVariants((prev) => prev.filter((v) => v.id !== variantId))
-      setVariantNotice('Variant removed.')
+      setVariantNotice('Size removed.')
       router.refresh()
     } catch {
-      setVariantError('Network error removing variant.')
+      setVariantError('Network error removing size.')
     } finally {
       setVariantBusyId(null)
     }
@@ -166,7 +182,7 @@ export function EditProductClient({ product }: EditProductClientProps) {
       })
       const data = (await res.json()) as { variant?: AdminVariant; error?: string }
       if (!res.ok) {
-        setVariantError(data.error || 'Could not add variant.')
+        setVariantError(data.error || 'Could not add size.')
         return
       }
       if (data.variant) {
@@ -175,10 +191,10 @@ export function EditProductClient({ product }: EditProductClientProps) {
       setNewSize('')
       setNewSku('')
       setNewStock('')
-      setVariantNotice('Variant added.')
+      setVariantNotice('Size added.')
       router.refresh()
     } catch {
-      setVariantError('Network error adding variant.')
+      setVariantError('Network error adding size.')
     } finally {
       setVariantBusyId(null)
     }
@@ -186,10 +202,10 @@ export function EditProductClient({ product }: EditProductClientProps) {
 
   return (
     <div className="space-y-8">
-      {/* Product Details Form */}
+      {/* Product Details & Photography Form */}
       <form
         onSubmit={handleSaveProduct}
-        className="border border-[#e2e2de] bg-white p-6 space-y-5"
+        className="border border-[#e2e2de] bg-white p-6 space-y-6"
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-bold uppercase tracking-[0.06em]">Product Details</h2>
@@ -261,20 +277,23 @@ export function EditProductClient({ product }: EditProductClientProps) {
           />
         </label>
 
-        <label className="block">
-          <span className="block text-[11px] uppercase tracking-[0.06em] text-[#6a6a6a]">
-            Image URLs (one per line)
-          </span>
-          <textarea
-            rows={3}
-            value={imagesText}
-            onChange={(e) => setImagesText(e.target.value)}
-            className="mt-1.5 w-full border border-[#d6d6d6] px-3 py-2 font-mono text-xs outline-none focus:border-[#030304]"
+        <div className="border-t border-[#ecece8] pt-5">
+          <ProductImageUploader
+            images={images}
+            onChange={setImages}
+            disabled={savingProduct}
           />
-        </label>
+        </div>
 
-        {productError ? <p className="text-xs text-[#ff5331]">{productError}</p> : null}
-        {productNotice ? <p className="text-xs text-emerald-700">{productNotice}</p> : null}
+        {productError ? (
+          <div
+            role="alert"
+            className="border-l-2 border-[#ff5331] bg-[#fff5f2] px-4 py-3 text-xs text-[#030304]"
+          >
+            {productError}
+          </div>
+        ) : null}
+        {productNotice ? <p className="text-xs font-medium text-emerald-700">{productNotice}</p> : null}
 
         <button
           type="submit"
@@ -285,19 +304,33 @@ export function EditProductClient({ product }: EditProductClientProps) {
         </button>
       </form>
 
-      {/* Variants Manager */}
+      {/* Available Sizes & Pieces Available Manager */}
       <div className="border border-[#e2e2de] bg-white p-6 space-y-5">
-        <div>
-          <h2 className="text-sm font-bold uppercase tracking-[0.06em]">
-            Variants &amp; Stock ({variants.length})
-          </h2>
-          <p className="mt-0.5 text-[11px] text-[#757575]">
-            Changes save immediately via PATCH/POST/DELETE. Blank stock = untracked.
-          </p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 className="text-sm font-bold uppercase tracking-[0.06em]">
+              Available Sizes &amp; Pieces Available ({variants.length})
+            </h2>
+            <p className="mt-0.5 text-[11px] text-[#757575]">
+              Changes save immediately. Leave Pieces Available blank for untracked stock, or set 0 for out of stock.
+            </p>
+          </div>
+          <span className="border border-[#e2e2de] bg-[#fafaf8] px-2.5 py-1 text-[11px] font-semibold text-[#030304]">
+            Total Tracked: {totalTrackedPieces} pcs
+          </span>
         </div>
 
         {variantError ? <p className="text-xs text-[#ff5331]">{variantError}</p> : null}
         {variantNotice ? <p className="text-xs text-emerald-700">{variantNotice}</p> : null}
+
+        {variants.length > 0 ? (
+          <div className="hidden grid-cols-12 gap-2 px-3 text-[10px] font-bold uppercase tracking-[0.06em] text-[#6a6a6a] sm:grid">
+            <span className="col-span-3">Available Size</span>
+            <span className="col-span-4">SKU (Optional)</span>
+            <span className="col-span-2">Pieces Available</span>
+            <span className="col-span-3 text-right">Actions</span>
+          </div>
+        ) : null}
 
         <div className="space-y-3">
           {variants.map((v) => (
@@ -311,54 +344,86 @@ export function EditProductClient({ product }: EditProductClientProps) {
           ))}
         </div>
 
-        <form
-          onSubmit={handleAddVariant}
-          className="mt-6 border-t border-[#ecece8] pt-5 grid grid-cols-1 gap-2 sm:grid-cols-12 items-end"
-        >
-          <label className="sm:col-span-3">
-            <span className="block text-[11px] uppercase tracking-[0.06em] text-[#6a6a6a]">
-              New Size
+        {/* Quick-Add Size Presets + Add Form */}
+        <div className="mt-6 border-t border-[#ecece8] pt-5 space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#6a6a6a]">
+              Quick-add sizes:
             </span>
-            <input
-              required
-              value={newSize}
-              onChange={(e) => setNewSize(e.target.value)}
-              placeholder="XXL / One Size"
-              className="mt-1 w-full border border-[#d6d6d6] px-3 py-2 text-xs outline-none focus:border-[#030304]"
-            />
-          </label>
-          <label className="sm:col-span-4">
-            <span className="block text-[11px] uppercase tracking-[0.06em] text-[#6a6a6a]">
-              SKU (optional)
-            </span>
-            <input
-              value={newSku}
-              onChange={(e) => setNewSku(e.target.value)}
-              placeholder="MK-SKU-XXL"
-              className="mt-1 w-full border border-[#d6d6d6] px-3 py-2 font-mono text-xs outline-none focus:border-[#030304]"
-            />
-          </label>
-          <label className="sm:col-span-3">
-            <span className="block text-[11px] uppercase tracking-[0.06em] text-[#6a6a6a]">
-              Stock Qty
-            </span>
-            <input
-              type="number"
-              min="0"
-              value={newStock}
-              onChange={(e) => setNewStock(e.target.value)}
-              placeholder="Blank = untracked"
-              className="mt-1 w-full border border-[#d6d6d6] px-3 py-2 text-xs outline-none focus:border-[#030304]"
-            />
-          </label>
-          <button
-            type="submit"
-            disabled={variantBusyId === 'new'}
-            className="sm:col-span-2 bg-[#030304] px-3 py-2 text-xs font-medium uppercase tracking-[0.06em] text-white hover:bg-[#1f1f22] disabled:opacity-50"
+            {SIZE_PRESETS.map((preset) => {
+              const exists = variants.some(
+                (v) => v.size.trim().toLowerCase() === preset.toLowerCase(),
+              )
+              return (
+                <button
+                  key={preset}
+                  type="button"
+                  disabled={exists}
+                  onClick={() => {
+                    setNewSize(preset)
+                    if (!newStock) setNewStock('10')
+                  }}
+                  className={`border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.04em] transition-colors ${
+                    exists
+                      ? 'border-emerald-200 bg-emerald-50 text-emerald-800 cursor-default'
+                      : 'border-[#d6d6d6] bg-white text-[#030304] hover:border-[#030304] hover:bg-[#030304] hover:text-white'
+                  }`}
+                >
+                  {exists ? `✓ ${preset}` : `+ ${preset}`}
+                </button>
+              )
+            })}
+          </div>
+
+          <form
+            onSubmit={handleAddVariant}
+            className="grid grid-cols-1 gap-2 sm:grid-cols-12 items-end"
           >
-            + Add
-          </button>
-        </form>
+            <label className="sm:col-span-3">
+              <span className="block text-[11px] uppercase tracking-[0.06em] text-[#6a6a6a]">
+                Available Size
+              </span>
+              <input
+                required
+                value={newSize}
+                onChange={(e) => setNewSize(e.target.value)}
+                placeholder="XXL / One Size"
+                className="mt-1 w-full border border-[#d6d6d6] px-3 py-2 text-xs outline-none focus:border-[#030304]"
+              />
+            </label>
+            <label className="sm:col-span-4">
+              <span className="block text-[11px] uppercase tracking-[0.06em] text-[#6a6a6a]">
+                SKU (optional)
+              </span>
+              <input
+                value={newSku}
+                onChange={(e) => setNewSku(e.target.value)}
+                placeholder="MK-SKU-XXL"
+                className="mt-1 w-full border border-[#d6d6d6] px-3 py-2 font-mono text-xs outline-none focus:border-[#030304]"
+              />
+            </label>
+            <label className="sm:col-span-3">
+              <span className="block text-[11px] uppercase tracking-[0.06em] text-[#6a6a6a]">
+                Pieces Available
+              </span>
+              <input
+                type="number"
+                min="0"
+                value={newStock}
+                onChange={(e) => setNewStock(e.target.value)}
+                placeholder="Blank = untracked"
+                className="mt-1 w-full border border-[#d6d6d6] px-3 py-2 text-xs outline-none focus:border-[#030304]"
+              />
+            </label>
+            <button
+              type="submit"
+              disabled={variantBusyId === 'new'}
+              className="sm:col-span-2 bg-[#030304] px-3 py-2 text-xs font-medium uppercase tracking-[0.06em] text-white hover:bg-[#1f1f22] disabled:opacity-50"
+            >
+              + Add Size
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )
@@ -386,13 +451,15 @@ function VariantEditorRow({
       <input
         value={size}
         onChange={(e) => setSize(e.target.value)}
-        placeholder="Size"
+        placeholder="Available Size"
+        aria-label="Available Size"
         className="sm:col-span-3 border border-[#d6d6d6] bg-white px-2.5 py-1.5 text-xs outline-none focus:border-[#030304]"
       />
       <input
         value={sku}
         onChange={(e) => setSku(e.target.value)}
         placeholder="SKU"
+        aria-label="SKU"
         className="sm:col-span-4 border border-[#d6d6d6] bg-white px-2.5 py-1.5 font-mono text-xs outline-none focus:border-[#030304]"
       />
       <input
@@ -401,6 +468,7 @@ function VariantEditorRow({
         value={stockQty}
         onChange={(e) => setStockQty(e.target.value)}
         placeholder="Untracked"
+        aria-label="Pieces Available"
         className="sm:col-span-2 border border-[#d6d6d6] bg-white px-2.5 py-1.5 text-xs outline-none focus:border-[#030304]"
       />
       <div className="sm:col-span-3 flex items-center justify-end gap-2">

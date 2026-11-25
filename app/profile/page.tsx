@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import { requireUser } from '@/lib/auth'
 import { getCartResponse } from '@/lib/cart'
+import { formatShippingAddress } from '@/lib/money'
+import { extractOrderTrackingMeta } from '@/lib/order-status'
 import { StorefrontHeader } from '@/components/storefront/StorefrontHeader'
 import { ProfileClient } from '@/components/storefront/ProfileClient'
 
@@ -15,7 +17,12 @@ export default async function ProfilePage() {
       where: { userId: user.id },
       orderBy: { createdAt: 'desc' },
       take: 25,
-      include: { items: true },
+      include: {
+        items: true,
+        events: {
+          orderBy: { receivedAt: 'asc' },
+        },
+      },
     }),
   ])
 
@@ -49,11 +56,23 @@ export default async function ProfilePage() {
             id: o.id,
             reference: o.reference,
             status: o.status,
+            subtotalKobo: o.subtotalKobo,
+            shippingKobo: o.shippingKobo,
             totalKobo: o.totalKobo,
             createdAt: o.createdAt.toISOString(),
+            paidAt: o.paidAt ? o.paidAt.toISOString() : null,
+            shippingAddressText: formatShippingAddress(o.shippingAddress),
             itemsSummary: o.items
               .map((i) => `${i.qty}× ${i.productNameSnap} (${i.sizeSnap})`)
               .join(', '),
+            items: o.items.map((i) => ({
+              id: i.id,
+              productNameSnap: i.productNameSnap,
+              sizeSnap: i.sizeSnap,
+              unitPriceKobo: i.unitPriceKobo,
+              qty: i.qty,
+            })),
+            trackingMeta: extractOrderTrackingMeta(o, o.events),
           }))}
         />
       </section>

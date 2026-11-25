@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
       select: { id: true, reference: true, totalKobo: true },
     })
 
-    const callbackUrl = `${support.siteUrl.replace(/\/$/, '')}/profile?order=${encodeURIComponent(order.reference)}`
+    const callbackUrl = `${support.siteUrl.replace(/\/$/, '')}/orders/${encodeURIComponent(order.reference)}/confirmation`
 
     try {
       const paystack = await initializePaystackTransaction({

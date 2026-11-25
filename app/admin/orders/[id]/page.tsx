@@ -2,7 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { formatLagosDate, formatNaira, formatShippingAddress } from '@/lib/money'
-import { StatusBadge } from '@/components/admin/StatusBadge'
+import { extractOrderTrackingMeta } from '@/lib/order-status'
+import { OrderStatusStepper, StatusBadge } from '@/components/admin/StatusBadge'
 import { OrderDetailActions } from '@/components/admin/OrderDetailActions'
 
 export const dynamic = 'force-dynamic'
@@ -26,6 +27,8 @@ export default async function AdminOrderDetailPage({
   if (!order) {
     notFound()
   }
+
+  const trackingMeta = extractOrderTrackingMeta(order, order.events)
 
   return (
     <div className="space-y-6">
@@ -53,7 +56,13 @@ export default async function AdminOrderDetailPage({
           orderId={order.id}
           reference={order.reference}
           status={order.status}
+          currentEstimatedDelivery={trackingMeta.estimatedDelivery}
         />
+      </div>
+
+      {/* 5-Stage Order Delivery Status Stepper */}
+      <div className="border border-[#e2e2de] bg-white p-6">
+        <OrderStatusStepper status={order.status} trackingMeta={trackingMeta} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">

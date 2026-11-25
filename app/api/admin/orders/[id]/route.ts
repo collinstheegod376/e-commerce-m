@@ -4,24 +4,51 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireApiAdmin } from '@/lib/auth'
 import { issuePaystackRefund } from '@/lib/paystack'
+import { emails } from '@/lib/emails'
 import { ApiError, handleRouteError } from '@/lib/http'
 
 const patchOrderSchema = z.object({
-  status: z.enum(['fulfilled', 'cancelled', 'refunded']),
+  status: z.enum([
+    'paid',
+    'waiting_confirmation',
+    'confirmed',
+    'sent_out',
+    'delivered',
+    'fulfilled',
+    'cancelled',
+    'refunded',
+  ]),
   note: z.string().trim().max(300).optional(),
+  estimatedDelivery: z.string().trim().max(120).optional(),
 })
 
+const TRACKING_AND_REFUND_TARGETS = new Set([
+  'paid',
+  'waiting_confirmation',
+  'confirmed',
+  'sent_out',
+  'delivered',
+  'fulfilled',
+  'refunded',
+])
+
 /**
- * Allowed admin order status transitions (documented in README-ADMIN.md for Agent 4):
- *  - paid -> fulfilled
- *  - pending | failed -> cancelled
- *  - paid | fulfilled -> refunded (calls Agent 4's issuePaystackRefund helper)
+ * Allowed admin order status transitions:
+ *  - Full forward/backward control across the 5 tracking stages
+ *    (paid, waiting_confirmation, confirmed, sent_out, delivered) + legacy fulfilled,
+ *    plus refunding any paid/tracking stage via Paystack.
+ *  - pending | failed | abandoned -> paid (manual verification) or cancelled.
  */
 const ALLOWED_TRANSITIONS: Record<string, ReadonlySet<string>> = {
-  paid: new Set(['fulfilled', 'refunded']),
-  fulfilled: new Set(['refunded']),
-  pending: new Set(['cancelled']),
-  failed: new Set(['cancelled']),
+  paid: TRACKING_AND_REFUND_TARGETS,
+  waiting_confirmation: TRACKING_AND_REFUND_TARGETS,
+  confirmed: TRACKING_AND_REFUND_TARGETS,
+  sent_out: TRACKING_AND_REFUND_TARGETS,
+  delivered: TRACKING_AND_REFUND_TARGETS,
+  fulfilled: TRACKING_AND_REFUND_TARGETS,
+  pending: new Set(['paid', 'cancelled']),
+  failed: new Set(['paid', 'cancelled']),
+  abandoned: new Set(['paid', 'cancelled']),
 }
 
 export async function GET(
@@ -112,10 +139,15 @@ export async function PATCH(
       }),
     )
 
+    const updateData: { status: string; paidAt?: Date } = { status: body.status }
+    if (body.status === 'paid' && !existing.paidAt) {
+      updateData.paidAt = new Date()
+    }
+
     const updatedOrder = await prisma.$transaction(async (tx) => {
       const updated = await tx.order.update({
         where: { id: existing.id },
-        data: { status: body.status },
+        data: updateData,
         include: {
           user: { select: { id: true, name: true, email: true, phone: true } },
           items: true,
@@ -134,6 +166,7 @@ export async function PATCH(
             fromStatus: existing.status,
             toStatus: body.status,
             note: body.note ?? null,
+            estimatedDelivery: body.estimatedDelivery ?? null,
             refund: refundMeta ?? null,
           },
         },
@@ -148,6 +181,30 @@ export async function PATCH(
         },
       })
     })
+
+    const shouldSendStatusEmail =
+      (body.status === 'confirmed' ||
+        body.status === 'sent_out' ||
+        body.status === 'delivered') &&
+      existing.status !== body.status
+        ? true
+        : body.status === 'paid' &&
+          (existing.status === 'pending' ||
+            existing.status === 'failed' ||
+            existing.status === 'abandoned')
+
+    if (shouldSendStatusEmail) {
+      await Promise.allSettled([
+        emails.sendOrderStatusUpdate(
+          updatedOrder,
+          body.status as 'paid' | 'confirmed' | 'sent_out' | 'delivered',
+          {
+            note: body.note,
+            estimatedDelivery: body.estimatedDelivery,
+          },
+        ),
+      ])
+    }
 
     return NextResponse.json({ order: updatedOrder })
   } catch (err) {

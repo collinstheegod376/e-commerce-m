@@ -18,7 +18,11 @@ const patchProductSchema = z.object({
   priceKobo: z.number().int().min(100).optional(),
   priceNaira: z.number().positive().optional(),
   active: z.boolean().optional(),
-  images: z.array(z.string().trim().min(1)).max(12).optional(),
+  images: z
+    .array(z.string().trim().min(1, 'Image URL cannot be empty'))
+    .min(5, 'A product must have 1 main image and at least 4 additional inspection images (5 total).')
+    .max(12, 'Maximum 12 product images allowed.')
+    .optional(),
 })
 
 export async function GET(

@@ -5,6 +5,12 @@ import { verifyPaystackSignature } from '@/lib/paystack'
 import { notifier, type FullOrder } from '@/lib/notifier'
 import { emails } from '@/lib/emails'
 import { handleRouteError, jsonError } from '@/lib/http'
+import { REALIZED_REVENUE_STATUSES } from '@/lib/order-status'
+
+const PAID_OR_POST_PAID_STATUSES = new Set<string>([
+  ...REALIZED_REVENUE_STATUSES,
+  'refunded',
+])
 
 interface PaystackWebhookPayload {
   event?: string
@@ -116,7 +122,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ received: true, mismatch: true })
       }
 
-      if (order.status === 'paid' || order.status === 'fulfilled' || order.status === 'refunded') {
+      if (PAID_OR_POST_PAID_STATUSES.has(order.status)) {
         return NextResponse.json({ received: true, alreadyPaid: true })
       }
 

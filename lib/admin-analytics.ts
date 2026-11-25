@@ -1,12 +1,15 @@
 import 'server-only'
 import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
+import { REALIZED_REVENUE_STATUSES } from '@/lib/order-status'
+
+const REALIZED_REVENUE_SET = new Set<string>(REALIZED_REVENUE_STATUSES)
 
 export type RevenueRange = '7d' | '30d' | '90d' | 'all'
 
 export interface OverviewStats {
   revenue: number // kobo
-  orders: number // paid + fulfilled count
+  orders: number // realized revenue orders count
   users: number
   aov: number // average order value in kobo
   successRate: number // 0..100 percentage
@@ -62,9 +65,9 @@ export async function getOverviewStats(): Promise<OverviewStats> {
       }>
     >(Prisma.sql`
       SELECT
-        COALESCE(SUM(CASE WHEN status IN ('paid', 'fulfilled') THEN total_kobo ELSE 0 END), 0) AS paid_revenue,
-        COUNT(*) FILTER (WHERE status IN ('paid', 'fulfilled')) AS paid_orders,
-        COUNT(*) FILTER (WHERE status IN ('paid', 'fulfilled', 'failed', 'abandoned')) AS settled_attempts
+        COALESCE(SUM(CASE WHEN status IN ('paid', 'waiting_confirmation', 'confirmed', 'sent_out', 'delivered', 'fulfilled') THEN total_kobo ELSE 0 END), 0) AS paid_revenue,
+        COUNT(*) FILTER (WHERE status IN ('paid', 'waiting_confirmation', 'confirmed', 'sent_out', 'delivered', 'fulfilled')) AS paid_orders,
+        COUNT(*) FILTER (WHERE status IN ('paid', 'waiting_confirmation', 'confirmed', 'sent_out', 'delivered', 'fulfilled', 'failed', 'abandoned')) AS settled_attempts
       FROM orders
     `),
     prisma.profile.count(),
@@ -103,7 +106,7 @@ export async function getRevenueSeries(range: RevenueRange): Promise<RevenuePoin
         COALESCE(SUM(total_kobo), 0) AS revenue,
         COUNT(*) AS orders
       FROM orders
-      WHERE status IN ('paid', 'fulfilled')
+      WHERE status IN ('paid', 'waiting_confirmation', 'confirmed', 'sent_out', 'delivered', 'fulfilled')
       GROUP BY 1
       ORDER BY 1 ASC
     `)
@@ -115,7 +118,7 @@ export async function getRevenueSeries(range: RevenueRange): Promise<RevenuePoin
         COALESCE(SUM(total_kobo), 0) AS revenue,
         COUNT(*) AS orders
       FROM orders
-      WHERE status IN ('paid', 'fulfilled')
+      WHERE status IN ('paid', 'waiting_confirmation', 'confirmed', 'sent_out', 'delivered', 'fulfilled')
         AND COALESCE(paid_at, created_at) >= ${cutoff}
       GROUP BY 1
       ORDER BY 1 ASC
@@ -147,7 +150,7 @@ export async function getTopProducts(limit = 10): Promise<TopProductStat[]> {
     JOIN orders o ON o.id = oi.order_id
     JOIN product_variants v ON v.id = oi.variant_id
     JOIN products p ON p.id = v.product_id
-    WHERE o.status IN ('paid', 'fulfilled')
+    WHERE o.status IN ('paid', 'waiting_confirmation', 'confirmed', 'sent_out', 'delivered', 'fulfilled')
     GROUP BY p.id, p.name
     ORDER BY qty_sold DESC
     LIMIT ${limit}
@@ -173,7 +176,7 @@ export async function getSizeDistribution(): Promise<SizeStat[]> {
       COALESCE(SUM(oi.qty), 0) AS qty
     FROM order_items oi
     JOIN orders o ON o.id = oi.order_id
-    WHERE o.status IN ('paid', 'fulfilled')
+    WHERE o.status IN ('paid', 'waiting_confirmation', 'confirmed', 'sent_out', 'delivered', 'fulfilled')
     GROUP BY 1
     ORDER BY qty DESC
   `)
@@ -202,7 +205,7 @@ export async function getPaymentOutcomes(): Promise<PaymentOutcomeStats> {
 
   for (const row of rows) {
     const n = Number(row.count ?? 0)
-    if (row.status === 'paid' || row.status === 'fulfilled') {
+    if (REALIZED_REVENUE_SET.has(row.status)) {
       counts.paid += n
     } else if (row.status === 'failed') {
       counts.failed += n
