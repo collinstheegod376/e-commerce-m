@@ -71,9 +71,7 @@ export function EditProductClient({ product }: EditProductClientProps) {
 
     const cleanedImages = images.map((url) => url.trim()).filter(Boolean)
     if (cleanedImages.length < MIN_PRODUCT_IMAGES) {
-      setProductError(
-        'A product must have 1 main image and at least 4 additional inspection images (5 total).',
-      )
+      setProductError('Upload at least 1 main show image before saving this product.')
       return
     }
 

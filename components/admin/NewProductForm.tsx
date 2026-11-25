@@ -91,9 +91,7 @@ export function NewProductForm() {
 
     const cleanedImages = images.map((url) => url.trim()).filter(Boolean)
     if (cleanedImages.length < MIN_PRODUCT_IMAGES) {
-      setError(
-        'Upload 1 main image and at least 4 additional inspection images (5 total) before creating this product.',
-      )
+      setError('Upload at least 1 main show image before creating this product.')
       return
     }
 

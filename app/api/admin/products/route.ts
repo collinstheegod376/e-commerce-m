@@ -29,8 +29,7 @@ const createProductSchema = z
     active: z.boolean().optional(),
     images: z
       .array(z.string().trim().min(1, 'Image URL cannot be empty'))
-      .min(5, 'Upload 1 main image and at least 4 additional inspection images (5 total).')
-      .max(12, 'Maximum 12 product images allowed.'),
+      .min(1, 'Upload at least 1 main show image.'),
     variants: z.array(initialVariantSchema).max(30).optional(),
   })
   .refine((v) => v.priceKobo !== undefined || v.priceNaira !== undefined, {

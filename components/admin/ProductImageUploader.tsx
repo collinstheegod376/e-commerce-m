@@ -14,11 +14,9 @@ import {
   Upload,
 } from 'lucide-react'
 
-export const MIN_INSPECTION_IMAGES = 4
-export const MIN_PRODUCT_IMAGES = 1 + MIN_INSPECTION_IMAGES // 5 total
-export const MAX_PRODUCT_IMAGES = 12
+export const MIN_PRODUCT_IMAGES = 1 // Main show image only
 
-const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024 // 8MB
+const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024 // 8MB per file
 const ACCEPTED_MIME_TYPES = new Set([
   'image/jpeg',
   'image/png',
@@ -51,7 +49,6 @@ export function ProductImageUploader({
   const inspectionImages = images.slice(1)
   const hasMain = Boolean(mainImage)
   const inspectionCount = inspectionImages.length
-  const meetsMinimum = hasMain && inspectionCount >= MIN_INSPECTION_IMAGES
   const isBusy = disabled || uploadingStatus !== null
 
   async function uploadSingleFile(file: File): Promise<string> {
@@ -108,26 +105,15 @@ export function ProductImageUploader({
     }
 
     if (mode === 'main') {
-      // If user drops/selects multiple files on Main, slot 0 gets the first and extras append as inspection images.
-      const remainingExtraSlots = Math.max(
-        0,
-        MAX_PRODUCT_IMAGES - (images.length > 0 ? images.length : 1),
-      )
-      const filesToUpload = files.slice(0, 1 + remainingExtraSlots)
-
-      if (files.length > filesToUpload.length) {
-        setUploadError(`Only ${MAX_PRODUCT_IMAGES} total images are allowed. Extra files were skipped.`)
-      }
-
       const uploadedUrls: string[] = []
       try {
-        for (let i = 0; i < filesToUpload.length; i++) {
+        for (let i = 0; i < files.length; i++) {
           setUploadingStatus(
-            filesToUpload.length > 1
-              ? `Uploading image ${i + 1} of ${filesToUpload.length}…`
+            files.length > 1
+              ? `Uploading image ${i + 1} of ${files.length}…`
               : 'Uploading main image…',
           )
-          const url = await uploadSingleFile(filesToUpload[i])
+          const url = await uploadSingleFile(files[i])
           uploadedUrls.push(url)
         }
 
@@ -135,8 +121,8 @@ export function ProductImageUploader({
           const [firstUrl, ...extraUrls] = uploadedUrls
           const next =
             images.length > 0
-              ? [firstUrl, ...images.slice(1), ...extraUrls].slice(0, MAX_PRODUCT_IMAGES)
-              : [firstUrl, ...extraUrls].slice(0, MAX_PRODUCT_IMAGES)
+              ? [firstUrl, ...images.slice(1), ...extraUrls]
+              : [firstUrl, ...extraUrls]
           onChange(next)
         }
       } catch (err) {
@@ -147,39 +133,26 @@ export function ProductImageUploader({
       return
     }
 
-    // mode === 'append'
-    const remainingSlots = MAX_PRODUCT_IMAGES - images.length
-    if (remainingSlots <= 0) {
-      setUploadError(`Maximum of ${MAX_PRODUCT_IMAGES} images reached.`)
-      return
-    }
-
-    const filesToUpload = files.slice(0, remainingSlots)
-    if (files.length > remainingSlots) {
-      setUploadError(
-        `Maximum of ${MAX_PRODUCT_IMAGES} total images allowed. Uploading first ${remainingSlots} file(s).`,
-      )
-    }
-
+    // mode === 'append' (no cap)
     const uploadedUrls: string[] = []
     try {
-      for (let i = 0; i < filesToUpload.length; i++) {
+      for (let i = 0; i < files.length; i++) {
         setUploadingStatus(
-          filesToUpload.length > 1
-            ? `Uploading image ${i + 1} of ${filesToUpload.length}…`
+          files.length > 1
+            ? `Uploading image ${i + 1} of ${files.length}…`
             : 'Uploading inspection image…',
         )
-        const url = await uploadSingleFile(filesToUpload[i])
+        const url = await uploadSingleFile(files[i])
         uploadedUrls.push(url)
       }
 
       if (uploadedUrls.length > 0) {
-        onChange([...images, ...uploadedUrls].slice(0, MAX_PRODUCT_IMAGES))
+        onChange([...images, ...uploadedUrls])
       }
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Image upload failed.')
       if (uploadedUrls.length > 0) {
-        onChange([...images, ...uploadedUrls].slice(0, MAX_PRODUCT_IMAGES))
+        onChange([...images, ...uploadedUrls])
       }
     } finally {
       setUploadingStatus(null)
@@ -258,10 +231,6 @@ export function ProductImageUploader({
     }
   }
 
-  // Always show at least 4 inspection slots (Inspect 1..4) plus any extra uploaded ones.
-  const inspectionSlotCount = Math.max(MIN_INSPECTION_IMAGES, inspectionImages.length)
-  const canAddMore = images.length < MAX_PRODUCT_IMAGES
-
   return (
     <div className="space-y-5">
       {/* Hidden File Inputs */}
@@ -292,35 +261,32 @@ export function ProductImageUploader({
         disabled={isBusy}
       />
 
-      {/* Header & Live Requirement Indicator */}
+      {/* Header & Live Status Indicator */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-[#030304]">
-            Product Photography (1 Main + 4+ Inspection Required)
+            Product Photography (Main Image Required · Unlimited Optional Gallery)
           </h3>
           <p className="mt-0.5 text-[11px] text-[#757575]">
-            JPEG, PNG, WebP, or AVIF up to 8MB each. Max {MAX_PRODUCT_IMAGES} images total.
+            JPEG, PNG, WebP, or AVIF up to 8MB each. Only the main show image is required.
           </p>
         </div>
 
         <div
           className={`inline-flex items-center gap-2 border px-3 py-1.5 text-[11px] font-semibold ${
-            meetsMinimum
+            hasMain
               ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
               : 'border-[#ff660c]/40 bg-[#fff5f0] text-[#b83b00]'
           }`}
         >
-          {meetsMinimum ? (
+          {hasMain ? (
             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
           ) : (
             <AlertTriangle className="h-3.5 w-3.5 text-[#ff5331]" />
           )}
           <span>
-            Main Image: {hasMain ? '✓' : 'Missing'} &nbsp;|&nbsp; Inspection Images:{' '}
-            {inspectionCount} / {MIN_INSPECTION_IMAGES} minimum {inspectionCount >= MIN_INSPECTION_IMAGES ? '✓' : ''}
-          </span>
-          <span className="ml-1 text-[10px] opacity-75">
-            ({images.length}/{MAX_PRODUCT_IMAGES})
+            Main Image: {hasMain ? '✓' : 'Required'} &nbsp;|&nbsp; Additional Images:{' '}
+            {inspectionCount} (optional)
           </span>
         </div>
       </div>
@@ -408,13 +374,13 @@ export function ProductImageUploader({
               Click to upload or drag &amp; drop Main Show Image
             </span>
             <span className="text-[11px] text-[#757575]">
-              Tip: Select 5+ images at once to fill Main + Inspection slots automatically
+              Uploading just the main image is enough — or drop multiple files to fill gallery angles too
             </span>
           </button>
         )}
       </div>
 
-      {/* Inspection Gallery Images (Slots 1–4+) */}
+      {/* Optional Inspection Gallery Images (Unlimited) */}
       <div
         onDragOver={(e) => handleDragOver(e, 'inspect')}
         onDragLeave={handleDragLeave}
@@ -428,50 +394,27 @@ export function ProductImageUploader({
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div>
             <h4 className="text-xs font-bold uppercase tracking-[0.06em] text-[#030304]">
-              Inspection Gallery Images (Minimum {MIN_INSPECTION_IMAGES} Required)
+              Additional Inspection Images (Optional · No Limit)
             </h4>
             <p className="mt-0.5 text-[11px] text-[#6a6a6a]">
-              Detail shots, back views, fabric close-ups, and styling angles shown in &ldquo;Inspect Piece&rdquo;.
+              Add as many extra detail shots, back views, or styling angles as you want for &ldquo;Inspect Piece&rdquo;.
             </p>
           </div>
-          {canAddMore ? (
-            <button
-              type="button"
-              disabled={isBusy}
-              onClick={() => addInspectInputRef.current?.click()}
-              className="inline-flex items-center gap-1.5 border border-[#030304] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.05em] text-[#030304] hover:bg-[#030304] hover:text-white disabled:opacity-50"
-            >
-              <ImagePlus className="h-3.5 w-3.5" />
-              + Add Inspection Images
-            </button>
-          ) : null}
+          <button
+            type="button"
+            disabled={isBusy}
+            onClick={() => addInspectInputRef.current?.click()}
+            className="inline-flex items-center gap-1.5 border border-[#030304] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.05em] text-[#030304] hover:bg-[#030304] hover:text-white disabled:opacity-50"
+          >
+            <ImagePlus className="h-3.5 w-3.5" />
+            + Add Inspection Images
+          </button>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: inspectionSlotCount }).map((_, slotOffset) => {
+          {inspectionImages.map((url, slotOffset) => {
             const globalIdx = slotOffset + 1
-            const url = images[globalIdx]
             const label = `Inspect ${slotOffset + 1}`
-
-            if (!url) {
-              return (
-                <button
-                  key={`empty-slot-${slotOffset}`}
-                  type="button"
-                  disabled={isBusy}
-                  onClick={() => addInspectInputRef.current?.click()}
-                  className="flex min-h-[196px] flex-col items-center justify-center gap-2 border border-dashed border-[#c8c8c4] bg-[#fafaf8] p-4 text-center transition-colors hover:border-[#030304] hover:bg-white disabled:opacity-50"
-                >
-                  <span className="border border-[#d6d6d6] bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-[#6a6a6a]">
-                    {label}
-                  </span>
-                  <ImagePlus className="h-5 w-5 text-[#757575]" />
-                  <span className="text-[11px] font-medium text-[#030304]">Upload Image</span>
-                  <span className="text-[10px] text-[#757575]">Required slot</span>
-                </button>
-              )
-            }
-
             const canMoveLeft = globalIdx > 1
             const canMoveRight = globalIdx < images.length - 1
 
@@ -550,23 +493,21 @@ export function ProductImageUploader({
             )
           })}
 
-          {/* "+ Add More Inspection Image" card when 4+ inspection images exist and under max */}
-          {inspectionImages.length >= MIN_INSPECTION_IMAGES && canAddMore ? (
-            <button
-              type="button"
-              disabled={isBusy}
-              onClick={() => addInspectInputRef.current?.click()}
-              className="flex min-h-[196px] flex-col items-center justify-center gap-2 border border-dashed border-[#c8c8c4] bg-[#fafaf8] p-4 text-center transition-colors hover:border-[#030304] hover:bg-white disabled:opacity-50"
-            >
-              <ImagePlus className="h-5 w-5 text-[#030304]" />
-              <span className="text-[11px] font-semibold text-[#030304]">
-                + Add More Inspection Image
-              </span>
-              <span className="text-[10px] text-[#757575]">
-                Up to {MAX_PRODUCT_IMAGES - images.length} more
-              </span>
-            </button>
-          ) : null}
+          {/* Always-available "+ Add Inspection Image" card (unlimited) */}
+          <button
+            type="button"
+            disabled={isBusy}
+            onClick={() => addInspectInputRef.current?.click()}
+            className="flex min-h-[196px] flex-col items-center justify-center gap-2 border border-dashed border-[#c8c8c4] bg-[#fafaf8] p-4 text-center transition-colors hover:border-[#030304] hover:bg-white disabled:opacity-50"
+          >
+            <ImagePlus className="h-5 w-5 text-[#030304]" />
+            <span className="text-[11px] font-semibold text-[#030304]">
+              + Add Inspection Image
+            </span>
+            <span className="text-[10px] text-[#757575]">
+              Optional · Unlimited
+            </span>
+          </button>
         </div>
       </div>
     </div>
