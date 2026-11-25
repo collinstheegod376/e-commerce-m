@@ -71,3 +71,39 @@ export function formatShippingAddress(address: unknown): string {
   if (!base && !notes) return 'Not provided'
   return notes ? `${base} (Notes: ${notes})` : base
 }
+
+/**
+ * Checks whether a customer has completed compulsory delivery location details
+ * (primary phone number + street address + city) required before checkout.
+ */
+export function getMissingDeliveryFields(profile: {
+  phone?: string | null
+  address?: unknown
+}): string[] {
+  const missing: string[] = []
+  if (!profile.phone || !profile.phone.trim()) {
+    missing.push('phone number')
+  }
+
+  const addr =
+    profile.address && typeof profile.address === 'object' && !Array.isArray(profile.address)
+      ? (profile.address as Record<string, unknown>)
+      : null
+
+  const street =
+    (typeof addr?.streetAddress === 'string' ? addr.streetAddress.trim() : '') ||
+    (typeof addr?.street === 'string' ? addr.street.trim() : '')
+  const city = typeof addr?.city === 'string' ? addr.city.trim() : ''
+
+  if (!street) missing.push('street address')
+  if (!city) missing.push('city')
+
+  return missing
+}
+
+export function hasCompleteDeliveryDetails(profile: {
+  phone?: string | null
+  address?: unknown
+}): boolean {
+  return getMissingDeliveryFields(profile).length === 0
+}

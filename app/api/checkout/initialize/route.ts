@@ -10,6 +10,7 @@ import {
 } from '@/lib/paystack'
 import { checkRateLimit, extractClientIp, rateLimitHeaders } from '@/lib/rate-limit'
 import { getSupportConfig } from '@/lib/support'
+import { getMissingDeliveryFields } from '@/lib/money'
 import { handleRouteError, jsonError } from '@/lib/http'
 
 /**
@@ -47,6 +48,18 @@ export async function POST(request: NextRequest) {
     const cart = await getCartResponse(user.id)
     if (cart.items.length === 0) {
       return jsonError(400, 'Your cart is empty.', 'EMPTY_CART')
+    }
+
+    const missingDelivery = getMissingDeliveryFields({
+      phone: user.phone,
+      address: user.address,
+    })
+    if (missingDelivery.length > 0) {
+      return jsonError(
+        400,
+        `Please complete your delivery details in Profile (${missingDelivery.join(', ')}) before checking out.`,
+        'DELIVERY_DETAILS_REQUIRED',
+      )
     }
 
     // Re-validate stock against live DB variants

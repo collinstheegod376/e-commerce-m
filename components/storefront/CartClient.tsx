@@ -3,7 +3,11 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import type { CartResponse } from '@/lib/cart'
-import { formatNaira, formatShippingAddress } from '@/lib/money'
+import {
+  formatNaira,
+  formatShippingAddress,
+  getMissingDeliveryFields,
+} from '@/lib/money'
 import { CartLine } from '@/components/storefront/CartLine'
 
 interface CartClientProps {
@@ -25,7 +29,11 @@ export function CartClient({ initialCart, profileSummary }: CartClientProps) {
 
   const itemCount = cart.items.reduce((sum, i) => sum + i.qty, 0)
   const addressText = formatShippingAddress(profileSummary.address)
-  const hasDeliveryInfo = Boolean(profileSummary.phone && addressText !== 'Not provided')
+  const missingDeliveryFields = getMissingDeliveryFields({
+    phone: profileSummary.phone,
+    address: profileSummary.address,
+  })
+  const hasDeliveryInfo = missingDeliveryFields.length === 0
 
   function syncCart(next: CartResponse) {
     setCart(next)
@@ -76,6 +84,12 @@ export function CartClient({ initialCart, profileSummary }: CartClientProps) {
   }
 
   async function handleCheckout() {
+    if (!hasDeliveryInfo) {
+      setError(
+        `Please add your ${missingDeliveryFields.join(', ')} in Profile before checking out.`,
+      )
+      return
+    }
     setCheckoutBusy(true)
     setError('')
     setNotice('')
@@ -179,20 +193,32 @@ export function CartClient({ initialCart, profileSummary }: CartClientProps) {
                   <span>{addressText}</span>
                 </div>
               ) : (
-                <p className="checkout-client-missing">
-                  Add your phone number and delivery address in Profile so our Lagos courier can
-                  reach you.
-                </p>
+                <div className="space-y-2.5">
+                  <p className="checkout-client-missing">
+                    Delivery location is required before checkout. Missing:{' '}
+                    <strong className="text-white">{missingDeliveryFields.join(', ')}</strong>.
+                  </p>
+                  <Link
+                    href="/profile"
+                    className="inline-flex w-full items-center justify-center rounded border border-[#ff660c] bg-[#ff660c]/15 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#ff660c] transition-colors hover:bg-[#ff660c] hover:text-[#01121a]"
+                  >
+                    Fill Delivery Details in Profile →
+                  </Link>
+                </div>
               )}
             </div>
 
             <button
               type="button"
-              disabled={checkoutBusy}
+              disabled={checkoutBusy || !hasDeliveryInfo}
               onClick={handleCheckout}
-              className="disabled:opacity-50"
+              className="disabled:cursor-not-allowed disabled:opacity-45"
             >
-              {checkoutBusy ? 'Initializing Paystack…' : 'Checkout with Paystack'}
+              {checkoutBusy
+                ? 'Initializing Paystack…'
+                : !hasDeliveryInfo
+                  ? 'Add Location Details to Checkout'
+                  : 'Checkout with Paystack'}
             </button>
             <small>Final order total &amp; shipping are verified server-side on checkout.</small>
           </aside>
