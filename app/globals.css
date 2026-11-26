@@ -26,14 +26,26 @@
   html {
     scroll-behavior: smooth;
     background: #01121a;
+    max-width: 100%;
+    overflow-x: clip;
   }
 
   body {
     min-width: 320px;
+    max-width: 100%;
     min-height: 100vh;
     background: #01121a;
     color: #f8fafc;
-    overflow-x: hidden;
+    overflow-x: clip;
+  }
+
+  /* Prevent iOS Safari auto-zoom when focusing form controls on mobile */
+  @media (max-width: 767px) {
+    input,
+    select,
+    textarea {
+      font-size: 16px;
+    }
   }
 
   button,
@@ -104,7 +116,10 @@
 /* Storefront shell & subtle architectural grid lines */
 .storefront {
   position: relative;
+  width: 100%;
+  max-width: 100%;
   min-height: 100dvh;
+  overflow-x: clip;
   background:
     radial-gradient(circle at 78% 24%, rgba(255, 102, 12, 0.09), transparent 45%),
     radial-gradient(circle at 18% 80%, rgba(7, 35, 48, 0.9), transparent 55%),
@@ -160,80 +175,35 @@
   font-weight: 800;
 }
 
-/* 3D Viewer & Hero media container */
-.hero-3d model-viewer {
-  width: 100%;
-  height: 100%;
-  min-height: 440px;
-  background-color: transparent;
-  --poster-color: transparent;
-}
-
-.model-hint {
-  position: absolute;
-  bottom: 1.25rem;
-  left: 50%;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 1rem;
-  border: 1px solid rgba(255, 102, 12, 0.35);
-  border-radius: 999px;
-  color: #cbd5e1;
-  background: rgba(1, 18, 26, 0.88);
-  backdrop-filter: blur(10px);
-  font-family: var(--font-sans), sans-serif;
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  transform: translateX(-50%);
-  pointer-events: none;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-}
-
-.model-hint span:first-child {
-  color: #ff660c;
-  font-weight: 700;
-}
-
-.model-hint span:first-child::before {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  margin-right: 0.5rem;
-  border-radius: 50%;
-  background: #ff660c;
-  content: '';
-  vertical-align: middle;
-  box-shadow: 0 0 8px #ff660c;
-}
-
 /* Inner pages & layout shell */
 .inner-page {
+  width: 100%;
+  max-width: 100%;
   min-height: 100dvh;
   height: auto;
-  overflow-x: hidden;
+  overflow-x: clip;
   overflow-y: auto;
 }
 
 .page-shell {
   position: relative;
   z-index: 2;
-  width: min(1360px, calc(100% - 2.5rem));
+  width: 100%;
+  max-width: 1360px;
+  min-width: 0;
   margin: 0 auto;
-  padding: clamp(2.5rem, 6vh, 4.5rem) 0 5rem;
+  padding: clamp(2rem, 5vh, 4.5rem) 1rem 5rem;
 }
 
 @media (min-width: 640px) {
   .page-shell {
-    width: min(1360px, calc(100% - 4rem));
+    padding-inline: 2rem;
   }
 }
 
 @media (min-width: 1024px) {
   .page-shell {
-    width: min(1360px, calc(100% - 6rem));
+    padding-inline: 3rem;
   }
 }
 
@@ -251,21 +221,25 @@
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.75rem 1rem;
+  min-width: 0;
+  max-width: 100%;
   margin-top: 0.75rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-  padding-bottom: 1.75rem;
+  padding-bottom: 1.5rem;
 }
 
 .page-title-row h1,
 .page-title-row h2 {
+  min-width: 0;
   font-family: var(--font-brush), cursive, sans-serif;
-  font-size: clamp(2.8rem, 6.5vw, 5.5rem);
+  font-size: clamp(2.4rem, 6.5vw, 5.5rem);
   font-weight: 400;
   line-height: 0.98;
   letter-spacing: 0.02em;
   color: #f8fafc;
   text-transform: uppercase;
+  overflow-wrap: break-word;
 }
 
 .page-title-row > span {
@@ -281,14 +255,15 @@
 /* Search bar */
 .large-search {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 1.25rem;
-  margin-top: clamp(2rem, 4vh, 3rem);
+  gap: 0.85rem;
+  max-width: 100%;
+  margin-top: clamp(1.75rem, 4vh, 3rem);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 0.75rem;
   background: rgba(4, 27, 38, 0.85);
-  padding: 1rem 1.35rem;
+  padding: 0.85rem 1rem;
   transition: border-color 220ms ease, box-shadow 220ms ease;
 }
 
@@ -419,13 +394,18 @@
   grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.75fr);
   gap: clamp(2rem, 5vw, 4.5rem);
   padding-top: 2.5rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .cart-row {
   display: grid;
-  grid-template-columns: 120px 1fr auto auto;
+  grid-template-columns: 120px minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 1.5rem;
+  min-width: 0;
+  max-width: 100%;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   padding: 1.5rem 0;
 }
@@ -436,6 +416,10 @@
 
 .cart-row .product-mark {
   height: 135px;
+}
+
+.cart-info {
+  min-width: 0;
 }
 
 .cart-info p,
@@ -751,6 +735,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  min-width: 0;
 }
 
 .profile-summary-list span {
@@ -767,6 +752,7 @@
   font-size: 0.88rem;
   font-weight: 600;
   line-height: 1.45;
+  overflow-wrap: break-word;
 }
 
 .profile-card-actions {
@@ -778,17 +764,22 @@
 
 .client-form {
   margin-top: 1.75rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .client-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.5rem 2rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .client-form-grid label {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .client-form-grid label.span-2 {
@@ -807,12 +798,13 @@
 
 .client-form-grid input {
   width: 100%;
+  min-width: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   padding: 0.4rem 0 0.7rem;
   color: #f8fafc;
   background: transparent;
   outline: none;
-  font-size: 0.95rem;
+  font-size: 1rem;
   transition: border-color 160ms ease;
 }
 
@@ -887,16 +879,23 @@
 .profile-grid {
   display: grid;
   grid-template-columns: minmax(270px, 0.65fr) minmax(0, 1.35fr);
-  gap: clamp(2.5rem, 6vw, 5.5rem);
-  padding-top: 3rem;
+  gap: clamp(2rem, 5vw, 5.5rem);
+  padding-top: clamp(1.75rem, 4vw, 3rem);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .profile-card {
   align-self: start;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   border-radius: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: #041b26;
-  padding: 2rem;
+  padding: clamp(1.25rem, 4vw, 2rem);
 }
 
 .avatar {
@@ -926,9 +925,10 @@
 .profile-card h2 {
   margin-top: 0.4rem;
   font-family: var(--font-display), sans-serif;
-  font-size: 1.85rem;
+  font-size: clamp(1.4rem, 4vw, 1.85rem);
   font-weight: 700;
   color: #f8fafc;
+  overflow-wrap: break-word;
 }
 
 .profile-card p {
@@ -936,32 +936,45 @@
   color: #94a3b8;
   font-size: 0.85rem;
   line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 
 .profile-content {
   display: flex;
   flex-direction: column;
-  gap: 3.5rem;
+  gap: clamp(2.25rem, 5vw, 3.5rem);
+  min-width: 0;
+  max-width: 100%;
 }
 
-.section-heading,
-.section-heading > div {
-  display: flex;
-  align-items: center;
+.profile-content > section {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
+  gap: 0.5rem 1rem;
+  min-width: 0;
+  max-width: 100%;
   border-bottom: 1px solid rgba(255, 255, 255, 0.16);
   padding-bottom: 1rem;
 }
 
 .section-heading > div {
-  gap: 1rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .section-heading span,
 .section-heading button {
+  flex-shrink: 0;
   color: #ff660c;
   font-family: var(--font-sans), sans-serif;
   font-size: 0.72rem;
@@ -971,10 +984,13 @@
 }
 
 .section-heading h2 {
+  min-width: 0;
   font-family: var(--font-display), sans-serif;
-  font-size: 1.45rem;
+  font-size: clamp(1.15rem, 3.8vw, 1.45rem);
   font-weight: 700;
+  line-height: 1.25;
   color: #f8fafc;
+  overflow-wrap: break-word;
 }
 
 .order-placeholder {
@@ -1137,7 +1153,7 @@
   .cart-layout,
   .auth-page,
   .profile-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .auth-editorial {
@@ -1147,12 +1163,12 @@
 
 @media (max-width: 640px) {
   .cart-row {
-    grid-template-columns: 90px 1fr;
-    gap: 1rem;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 0.875rem;
   }
 
   .cart-row .product-mark {
-    height: 110px;
+    height: 105px;
   }
 
   .cart-row > strong {
@@ -1160,8 +1176,20 @@
     text-align: left;
   }
 
+  .order-summary {
+    padding: 1.25rem;
+  }
+
+  .auth-form {
+    padding: 1.5rem;
+  }
+
   .client-form-grid,
   .order-placeholder {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .client-form-grid {
+    gap: 1.25rem;
   }
 }

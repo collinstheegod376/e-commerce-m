@@ -12,7 +12,6 @@ import {
 } from 'lucide-react'
 import { formatNairaCompact } from '@/lib/money'
 import { getProductEditorialMeta } from '@/lib/models-3d'
-import { ModelViewer } from '@/components/storefront/ModelViewer'
 import { SizeSelector } from '@/components/storefront/SizeSelector'
 import { QtyStepper } from '@/components/storefront/QtyStepper'
 import { AddToCart } from '@/components/storefront/AddToCart'
@@ -35,7 +34,6 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
   )
   const [qty, setQty] = useState(1)
   const [activeImageIdx, setActiveImageIdx] = useState(0)
-  const [show3D, setShow3D] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxZoomed, setLightboxZoomed] = useState(false)
 
@@ -51,13 +49,11 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
     safeImageIdx === 0 ? 'Main View' : `Inspect ${safeImageIdx}`
 
   const handlePrevImage = useCallback(() => {
-    setShow3D(false)
     setLightboxZoomed(false)
     setActiveImageIdx((prev) => (prev - 1 + images.length) % images.length)
   }, [images.length])
 
   const handleNextImage = useCallback(() => {
-    setShow3D(false)
     setLightboxZoomed(false)
     setActiveImageIdx((prev) => (prev + 1) % images.length)
   }, [images.length])
@@ -90,87 +86,77 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
     if (typeof index === 'number') {
       setActiveImageIdx(index)
     }
-    setShow3D(false)
     setLightboxZoomed(false)
     setLightboxOpen(true)
   }
 
   return (
     <>
-      <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
+      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-12">
         {/* Media / Inspect Piece Gallery */}
-        <div className="lg:col-span-7">
-          <div className="relative flex min-h-[460px] items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-[#072330] to-[#041b26] p-4 sm:p-6 shadow-2xl">
-            {show3D && meta.modelUrl ? (
-              <ModelViewer
-                src={meta.modelUrl}
-                poster={images[0]}
-                alt={product.name}
-                className="hero-3d relative !h-[500px] !w-full"
-              />
-            ) : (
-              <div className="group relative flex h-[480px] w-full items-center justify-center overflow-hidden rounded-xl bg-slate-100 p-6">
-                {/* Main / Active Angle Image */}
-                <button
-                  type="button"
-                  onClick={() => openLightbox()}
-                  aria-label={`Inspect ${product.name} (${currentLabel}) in full screen`}
-                  className="flex h-full w-full cursor-zoom-in items-center justify-center"
-                >
-                  <img
-                    src={currentImage}
-                    alt={`${product.name} — ${currentLabel}`}
-                    className="max-h-full w-full object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-[1.03]"
-                  />
-                </button>
+        <div className="min-w-0 lg:col-span-7">
+          <div className="relative flex min-h-[340px] items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-[#072330] to-[#041b26] p-3 shadow-2xl sm:min-h-[460px] sm:p-6">
+            <div className="group relative flex h-[320px] w-full items-center justify-center overflow-hidden rounded-xl bg-slate-100 p-4 sm:h-[480px] sm:p-6">
+              {/* Main / Active Angle Image */}
+              <button
+                type="button"
+                onClick={() => openLightbox()}
+                aria-label={`Inspect ${product.name} (${currentLabel}) in full screen`}
+                className="flex h-full w-full cursor-zoom-in items-center justify-center"
+              >
+                <img
+                  src={currentImage}
+                  alt={`${product.name} — ${currentLabel}`}
+                  className="max-h-full w-full object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-[1.03]"
+                />
+              </button>
 
-                {/* Top-Left Angle Pill */}
-                <div className="pointer-events-none absolute left-3 top-3 flex items-center gap-2 rounded-full border border-white/15 bg-[#01121a]/85 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-100 backdrop-blur-sm">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#ff660c]" />
-                  <span>{currentLabel}</span>
-                  <span className="text-slate-400">
-                    {safeImageIdx + 1} / {images.length}
-                  </span>
-                </div>
-
-                {/* Top-Right Inspect Piece / Fullscreen Trigger */}
-                <button
-                  type="button"
-                  onClick={() => openLightbox()}
-                  className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-[#ff660c]/60 bg-[#01121a]/90 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#f8fafc] backdrop-blur-sm transition-all hover:border-[#ff660c] hover:bg-[#ff660c] hover:text-[#01121a]"
-                >
-                  <Expand className="h-3.5 w-3.5" />
-                  Inspect Piece
-                </button>
-
-                {/* Prev / Next Arrows */}
-                {images.length > 1 ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={handlePrevImage}
-                      aria-label="Previous angle"
-                      className="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-[#01121a]/80 text-white backdrop-blur-sm transition-all hover:border-[#ff660c] hover:bg-[#ff660c] hover:text-[#01121a]"
-                    >
-                      <ChevronLeft className="h-5 w-5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleNextImage}
-                      aria-label="Next angle"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-[#01121a]/80 text-white backdrop-blur-sm transition-all hover:border-[#ff660c] hover:bg-[#ff660c] hover:text-[#01121a]"
-                    >
-                      <ChevronRight className="h-5 w-5" />
-                    </button>
-                  </>
-                ) : null}
+              {/* Top-Left Angle Pill */}
+              <div className="pointer-events-none absolute left-2.5 top-2.5 flex items-center gap-1.5 rounded-full border border-white/15 bg-[#01121a]/85 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-100 backdrop-blur-sm sm:left-3 sm:top-3 sm:gap-2 sm:px-3 sm:text-[10px] sm:tracking-[0.14em]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#ff660c]" />
+                <span>{currentLabel}</span>
+                <span className="text-slate-400">
+                  {safeImageIdx + 1} / {images.length}
+                </span>
               </div>
-            )}
+
+              {/* Top-Right Inspect Piece / Fullscreen Trigger */}
+              <button
+                type="button"
+                onClick={() => openLightbox()}
+                className="absolute right-2.5 top-2.5 inline-flex items-center gap-1 rounded-full border border-[#ff660c]/60 bg-[#01121a]/90 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-[#f8fafc] backdrop-blur-sm transition-all hover:border-[#ff660c] hover:bg-[#ff660c] hover:text-[#01121a] sm:right-3 sm:top-3 sm:gap-1.5 sm:px-3.5 sm:py-1.5 sm:text-[10px] sm:tracking-[0.14em]"
+              >
+                <Expand className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                Inspect Piece
+              </button>
+
+              {/* Prev / Next Arrows */}
+              {images.length > 1 ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={handlePrevImage}
+                    aria-label="Previous angle"
+                    className="absolute left-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-[#01121a]/80 text-white backdrop-blur-sm transition-all hover:border-[#ff660c] hover:bg-[#ff660c] hover:text-[#01121a] sm:left-3 sm:h-10 sm:w-10"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNextImage}
+                    aria-label="Next angle"
+                    className="absolute right-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-[#01121a]/80 text-white backdrop-blur-sm transition-all hover:border-[#ff660c] hover:bg-[#ff660c] hover:text-[#01121a] sm:right-3 sm:h-10 sm:w-10"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                </>
+              ) : null}
+            </div>
           </div>
 
           {/* Interactive Multi-Angle Thumbnail Strip */}
           <div className="mt-4 space-y-2.5">
-            <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
               <span>
                 Inspection Angles ({images.length})
               </span>
@@ -187,14 +173,13 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
 
             <div className="flex flex-wrap items-center gap-2.5">
               {images.map((imgUrl, idx) => {
-                const isActive = !show3D && safeImageIdx === idx
+                const isActive = safeImageIdx === idx
                 const thumbLabel = idx === 0 ? 'Main' : `Inspect ${idx}`
                 return (
                   <button
                     key={`${imgUrl}-${idx}`}
                     type="button"
                     onClick={() => {
-                      setShow3D(false)
                       setActiveImageIdx(idx)
                     }}
                     className={`group relative flex flex-col items-center overflow-hidden rounded-xl border bg-[#041b26] p-1 transition-all ${
@@ -220,28 +205,14 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                   </button>
                 )
               })}
-
-              {meta.modelUrl ? (
-                <button
-                  type="button"
-                  onClick={() => setShow3D(true)}
-                  className={`flex h-[88px] items-center justify-center rounded-xl border px-4 text-xs font-bold uppercase tracking-[0.14em] transition-all ${
-                    show3D
-                      ? 'border-[#ff660c] bg-[#ff660c] text-[#01121a] shadow-[0_0_16px_rgba(255,102,12,0.35)]'
-                      : 'border-white/15 bg-[#041b26] text-slate-200 hover:border-[#ff660c] hover:text-[#ff660c]'
-                  }`}
-                >
-                  3D Studio View
-                </button>
-              ) : null}
             </div>
           </div>
         </div>
 
         {/* Info & Controls */}
-        <div className="flex flex-col lg:col-span-5">
+        <div className="flex min-w-0 flex-col lg:col-span-5">
           <p className="page-kicker">{meta.eyebrow}</p>
-          <h1 className="mt-3 font-brush text-[clamp(2.5rem,5vw,4.3rem)] uppercase leading-[1.02] tracking-[0.02em] text-[#f8fafc]">
+          <h1 className="mt-3 break-words font-brush text-[clamp(2.1rem,5vw,4.3rem)] uppercase leading-[1.02] tracking-[0.02em] text-[#f8fafc]">
             {product.name}
           </h1>
           <p className="mt-4 text-2xl font-extrabold tracking-tight text-[#ff660c]">
@@ -254,7 +225,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
             </p>
           ) : null}
 
-          <div className="mt-8 space-y-6 rounded-2xl border border-white/12 bg-[#041b26]/90 p-6">
+          <div className="mt-8 space-y-6 rounded-2xl border border-white/12 bg-[#041b26]/90 p-4 sm:p-6">
             <div>
               <p className="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
                 Select Size
@@ -293,7 +264,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
               />
             </div>
 
-            <div className="flex items-center justify-between border-t border-white/10 pt-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-300">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-300">
               <Link className="transition-colors hover:text-[#ff660c]" href="/cart">
                 View Cart →
               </Link>
@@ -326,7 +297,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
           className="fixed inset-0 z-50 flex flex-col bg-[#01121a]/95 backdrop-blur-md"
         >
           {/* Modal Header */}
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 sm:px-6">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 px-4 py-3 sm:px-6">
             <div className="flex items-center gap-3">
               <span className="rounded-full bg-[#ff660c] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#01121a]">
                 {currentLabel}

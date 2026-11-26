@@ -44,21 +44,32 @@ export function AdminShell({ adminName, adminEmail, children }: AdminShellProps)
   }
 
   return (
-    <div className="min-h-screen bg-[#f6f6f3] text-[#030304] flex flex-col md:flex-row">
+    <div className="min-h-screen w-full max-w-full overflow-x-clip bg-[#f6f6f3] text-[#030304] flex flex-col md:flex-row">
       {/* Sidebar */}
       <aside className="w-full md:w-64 shrink-0 bg-[#030304] text-white flex flex-col border-b md:border-b-0 md:border-r border-[#1f1f22]">
-        <div className="px-6 py-6 border-b border-[#1f1f22]">
-          <Link href="/admin" className="block">
-            <span className="text-[10px] uppercase tracking-[0.14em] text-[#ff5331]">
+        <div className="px-4 py-4 md:px-6 md:py-6 border-b border-[#1f1f22] flex items-center justify-between gap-3 md:block">
+          <Link href="/admin" className="block min-w-0">
+            <span className="block text-[10px] uppercase tracking-[0.14em] text-[#ff5331]">
               Maison Kriss
             </span>
-            <h1 className="mt-1 text-xl font-bold tracking-[-0.04em] text-white">
+            <h1 className="mt-0.5 text-lg font-bold tracking-[-0.04em] text-white md:mt-1 md:text-xl">
               Studio Admin
             </h1>
           </Link>
+
+          <Link
+            href="/"
+            className="inline-flex min-h-[36px] shrink-0 items-center gap-1.5 border border-[#2a2a2e] px-2.5 py-1.5 text-[11px] text-[#d4d4d4] transition-colors hover:border-white hover:text-white md:hidden"
+          >
+            <Store className="h-3.5 w-3.5" />
+            <span>Storefront</span>
+          </Link>
         </div>
 
-        <nav className="flex-1 px-3 py-4 flex md:flex-col gap-1 overflow-x-auto" aria-label="Admin navigation">
+        <nav
+          className="flex-1 px-3 py-2.5 md:py-4 flex md:flex-col gap-1 overflow-x-auto max-w-full"
+          aria-label="Admin navigation"
+        >
           {NAV_ITEMS.map((item) => {
             const active = item.exact
               ? pathname === item.href
@@ -69,7 +80,7 @@ export function AdminShell({ adminName, adminEmail, children }: AdminShellProps)
                 key={item.href}
                 href={item.href}
                 className={[
-                  'flex items-center gap-3 px-3 py-2.5 text-xs font-medium tracking-[0.02em] transition-colors whitespace-nowrap',
+                  'shrink-0 flex min-h-[40px] items-center gap-2.5 md:gap-3 px-3 py-2 text-xs font-medium tracking-[0.02em] transition-colors whitespace-nowrap',
                   active
                     ? 'bg-white text-[#030304]'
                     : 'text-[#b5b5b5] hover:bg-[#161618] hover:text-white',
@@ -94,16 +105,16 @@ export function AdminShell({ adminName, adminEmail, children }: AdminShellProps)
       </aside>
 
       {/* Main Column */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 bg-white border-b border-[#e2e2de] px-6 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <span className="inline-block h-2 w-2 rounded-full bg-[#ff5331]" />
-            <span className="text-xs uppercase tracking-[0.08em] text-[#6a6a6a] truncate">
+      <div className="flex-1 flex flex-col min-w-0 max-w-full">
+        <header className="min-h-14 md:h-16 bg-white border-b border-[#e2e2de] px-4 py-2.5 md:px-6 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-[#ff5331]" />
+            <span className="text-[11px] sm:text-xs uppercase tracking-[0.08em] text-[#6a6a6a] truncate">
               Lagos Operations · Locked Admin Zone
             </span>
           </div>
 
-          <div className="flex items-center gap-4 shrink-0">
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             <div className="text-right hidden sm:block">
               <div className="text-xs font-semibold text-[#030304]">{adminName}</div>
               <div className="text-[11px] text-[#757575]">{adminEmail}</div>
@@ -112,7 +123,7 @@ export function AdminShell({ adminName, adminEmail, children }: AdminShellProps)
               type="button"
               disabled={signingOut}
               onClick={handleSignOut}
-              className="inline-flex items-center gap-1.5 border border-[#d6d6d6] bg-white px-3 py-1.5 text-xs font-medium text-[#030304] hover:border-[#030304] disabled:opacity-50"
+              className="inline-flex min-h-[36px] items-center gap-1.5 border border-[#d6d6d6] bg-white px-3 py-1.5 text-xs font-medium text-[#030304] hover:border-[#030304] disabled:opacity-50"
             >
               <LogOut className="h-3.5 w-3.5" />
               <span>{signingOut ? 'Signing out…' : 'Sign out'}</span>
@@ -120,7 +131,9 @@ export function AdminShell({ adminName, adminEmail, children }: AdminShellProps)
           </div>
         </header>
 
-        <main className="flex-1 p-6 md:p-8 max-w-[1440px] w-full mx-auto">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-[1440px] w-full min-w-0 mx-auto">
+          {children}
+        </main>
       </div>
     </div>
   )

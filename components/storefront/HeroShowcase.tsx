@@ -13,7 +13,6 @@ import {
 } from 'lucide-react'
 import { formatNairaCompact } from '@/lib/money'
 import { getProductEditorialMeta } from '@/lib/models-3d'
-import { ModelViewer } from '@/components/storefront/ModelViewer'
 import { AddToCart } from '@/components/storefront/AddToCart'
 import { ProductCard, type StorefrontProduct } from '@/components/storefront/ProductCard'
 import { getStockLabel } from '@/components/storefront/SizeSelector'
@@ -210,19 +209,19 @@ export function HeroShowcase({ products }: HeroShowcaseProps) {
               {/* Column 2 (Center on Desktop, Below Viewer on Mobile): Editorial Copy, Specs & Controls */}
               <section
                 key={activeProduct.id}
-                className="animate-mk-fade-up order-2 flex flex-col justify-between lg:order-none lg:col-span-5"
+                className="animate-mk-fade-up order-2 flex min-w-0 flex-col justify-between lg:order-none lg:col-span-5"
                 aria-live="polite"
               >
                 <div>
                   {/* Subheading / Eyebrow */}
-                  <div className="inline-flex items-center rounded-full border border-[#ff660c]/35 bg-[#ff660c]/10 px-3.5 py-1.5">
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#ff660c]">
+                  <div className="inline-flex max-w-full items-center rounded-full border border-[#ff660c]/35 bg-[#ff660c]/10 px-3.5 py-1.5">
+                    <p className="truncate text-xs font-bold uppercase tracking-[0.2em] text-[#ff660c]">
                       {activeMeta.eyebrow}
                     </p>
                   </div>
 
                   {/* Aggressive Brush/Street-Stroke Main Heading */}
-                  <h1 className="mt-4 font-brush text-[clamp(2.75rem,5.2vw,4.75rem)] uppercase leading-[1.02] tracking-[0.02em] text-[#f8fafc] drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
+                  <h1 className="mt-4 break-words font-brush text-[clamp(2.25rem,5.2vw,4.75rem)] uppercase leading-[1.02] tracking-[0.02em] text-[#f8fafc] drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
                     {activeProduct.name}
                   </h1>
 
@@ -351,45 +350,36 @@ export function HeroShowcase({ products }: HeroShowcaseProps) {
                 </div>
               </section>
 
-              {/* Column 3 (Right on Desktop, First on Mobile): Interactive 3D / Studio Media Stage */}
-              <div className="order-1 lg:order-none lg:col-span-4">
-                <div className="relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-[#072330] via-[#041b26] to-[#01121a] p-4 shadow-2xl sm:min-h-[520px] lg:min-h-[580px]">
+              {/* Column 3 (Right on Desktop, First on Mobile): Studio Media Stage */}
+              <div className="order-1 min-w-0 lg:order-none lg:col-span-4">
+                <div className="relative flex min-h-[380px] flex-col justify-between overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-[#072330] via-[#041b26] to-[#01121a] p-4 shadow-2xl sm:min-h-[520px] lg:min-h-[580px]">
                   {/* Top Bar inside Viewer Stage */}
-                  <div className="z-10 flex items-center justify-between">
+                  <div className="z-10 flex items-center justify-between gap-2">
                     <span className="rounded-full border border-white/15 bg-[#01121a]/80 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-300 backdrop-blur-md">
-                      {activeMeta.modelUrl ? '3D Studio Inspection' : 'Editorial Lookbook'}
+                      Editorial Lookbook
                     </span>
                     <span className="font-brush text-xl text-[#ff660c]">
                       {String(activeIndex + 1).padStart(2, '0')}
                     </span>
                   </div>
 
-                  {/* Media or 3D Model */}
-                  <div className="relative my-auto flex h-[340px] w-full items-center justify-center sm:h-[420px] lg:h-[450px]">
-                    {activeMeta.modelUrl ? (
-                      <ModelViewer
-                        src={activeMeta.modelUrl}
-                        poster={activeProduct.images[0]}
-                        alt={activeProduct.name}
-                        className="hero-3d relative flex h-full w-full items-center justify-center"
-                      />
-                    ) : (
-                      <div className="relative flex h-full w-full items-center justify-center p-4">
-                        <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-xl bg-slate-100 p-4 shadow-inner">
-                          <img
-                            src={activeProduct.images[0] ?? '/assets/57c8a.png'}
-                            alt={activeProduct.name}
-                            className="max-h-full max-w-full object-contain mix-blend-multiply transition-transform duration-500 hover:scale-105"
-                          />
-                        </div>
+                  {/* Studio Lookbook Image Stage */}
+                  <div className="relative my-auto flex h-[280px] w-full items-center justify-center sm:h-[420px] lg:h-[450px]">
+                    <div className="relative flex h-full w-full items-center justify-center p-2 sm:p-4">
+                      <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-xl bg-slate-100 p-4 shadow-inner">
+                        <img
+                          src={activeProduct.images[0] ?? '/assets/57c8a.png'}
+                          alt={activeProduct.name}
+                          className="max-h-full max-w-full object-contain mix-blend-multiply transition-transform duration-500 hover:scale-105"
+                        />
                       </div>
-                    )}
+                    </div>
                   </div>
 
                   {/* Bottom Pagination & Next/Prev Controls */}
-                  <div className="z-10 mt-3 flex items-center justify-between border-t border-white/10 pt-3">
+                  <div className="z-10 mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-3">
                     <div
-                      className="flex items-center gap-1.5"
+                      className="flex items-center gap-1 sm:gap-1.5"
                       aria-label="Product showcase pagination"
                     >
                       {products.slice(0, 6).map((item, idx) => {
@@ -403,7 +393,7 @@ export function HeroShowcase({ products }: HeroShowcaseProps) {
                               setQty(1)
                             }}
                             aria-label={`Show ${item.name}`}
-                            className={`h-8 rounded-lg px-2.5 text-xs font-bold transition-all duration-300 ${
+                            className={`h-8 rounded-lg px-2 text-xs font-bold transition-all duration-300 sm:px-2.5 ${
                               isCurrent
                                 ? 'bg-[#ff660c] text-[#01121a] shadow-[0_0_12px_rgba(255,102,12,0.45)]'
                                 : 'text-slate-400 hover:bg-white/10 hover:text-white'
@@ -415,7 +405,7 @@ export function HeroShowcase({ products }: HeroShowcaseProps) {
                       })}
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                       <button
                         type="button"
                         aria-label="Previous piece"

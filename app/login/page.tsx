@@ -116,7 +116,7 @@ export default function LoginPage() {
     <AuthEditorialShell
       kicker="Members / 001"
       headline="Wear it your way."
-      subcopy="Private access to the Maison Kriss archive. Sign in to inspect 3D pieces, manage your fit, and reserve numbered drops."
+      subcopy="Private access to the Maison Kriss archive. Sign in to inspect editorial lookbooks, manage your fit, and reserve numbered drops."
     >
       <Suspense fallback={<p className="text-sm text-slate-400">Loading sign-in…</p>}>
         <LoginFormInner />

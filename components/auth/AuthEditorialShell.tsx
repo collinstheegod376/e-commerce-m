@@ -327,7 +327,7 @@ export function AuthEditorialShell({
               <span className="h-1.5 w-1.5 rounded-full bg-[#ff660c]" aria-hidden="true" />
               Lagos Studio · Private Archive
             </span>
-            <span className="text-slate-400">3D Inspection · Numbered Drops</span>
+            <span className="text-slate-400">Studio Lookbooks · Numbered Drops</span>
           </div>
         </div>
 

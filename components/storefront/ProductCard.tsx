@@ -41,7 +41,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
     <article className="group flex flex-col rounded-2xl border border-white/12 bg-[#041b26]/90 p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-[#ff660c]/60 hover:bg-[#072330] hover:shadow-[0_16px_40px_rgba(0,0,0,0.45)]">
       <div className="flex items-center justify-between text-xs">
         <span className="rounded-full border border-[#ff660c]/35 bg-[#ff660c]/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#ff660c]">
-          {meta.modelUrl ? '3D Interactive' : 'Archive Piece'}
+          Archive Piece
         </span>
         <span className="font-brush text-base text-slate-400 group-hover:text-[#ff660c]">
           {String(index + 1).padStart(2, '0')}

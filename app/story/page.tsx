@@ -32,36 +32,39 @@ export default async function StoryPage() {
           <span>Lagos Studio</span>
         </div>
 
-        <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-12">
-          <div className="lg:col-span-5 space-y-6">
-            <div className="story-visual h-[360px]">
+        <div className="mt-8 grid grid-cols-1 gap-8 sm:mt-12 sm:gap-12 lg:grid-cols-12">
+          <div className="min-w-0 space-y-4 sm:space-y-6 lg:col-span-5">
+            <div className="story-visual h-[260px] !p-4 sm:h-[360px] sm:!p-6">
               <img
                 src="/assets/hoodie-urban-legacy.jpg"
                 alt="Maison Kriss Urban Legacy Hoodie"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="story-visual h-[180px]">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <div className="story-visual h-[140px] !p-3 sm:h-[180px] sm:!p-6">
                 <img src="/assets/t-shirt-truth-seeker-v2.jpg" alt="Truth Seeker Tee" />
               </div>
-              <div className="story-visual h-[180px]">
+              <div className="story-visual h-[140px] !p-3 sm:h-[180px] sm:!p-6">
                 <img src="/assets/jorts-maison-kriss-product.jpg" alt="Maison Kriss Jorts" />
               </div>
             </div>
           </div>
 
-          <div className="lg:col-span-7">
+          <div className="min-w-0 break-words [overflow-wrap:anywhere] lg:col-span-7">
             <MarkdownContent
               content={
                 page?.content ??
                 'Maison Kriss is an independent Nigerian contemporary clothing studio based in Lagos.'
               }
             />
-            <div className="mt-10 flex items-center gap-6">
-              <Link href="/" className="primary-action inline-block">
+            <div className="mt-8 flex flex-wrap items-center gap-4 sm:mt-10 sm:gap-6">
+              <Link
+                href="/"
+                className="primary-action !mt-0 inline-flex min-h-[44px] items-center justify-center text-center"
+              >
                 Explore Collection
               </Link>
-              <Link href="/contact" className="story-link">
+              <Link href="/contact" className="story-link inline-flex min-h-[44px] items-center">
                 Contact Studio
               </Link>
             </div>

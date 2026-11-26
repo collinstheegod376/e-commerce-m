@@ -35,14 +35,16 @@ export function CartLine({
         )}
       </Link>
 
-      <div className="cart-info">
+      <div className="cart-info min-w-0">
         <p>{String(index + 1).padStart(2, '0')} / Maison Kriss</p>
         <Link href={`/products/${item.product.slug}`} className="hover:underline">
-          <h2>{item.product.name}</h2>
+          <h2 className="break-words !text-lg leading-snug sm:!text-[1.45rem]">
+            {item.product.name}
+          </h2>
         </Link>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
           <span>Size {item.size}</span>
-          <span>·</span>
+          <span aria-hidden="true">·</span>
           <span>{formatNairaCompact(item.unitPriceKobo)} each</span>
           {item.stockQty !== null && item.stockQty < 5 ? (
             <span className="!text-[#ff5331]">Only {item.stockQty} left</span>
@@ -52,22 +54,26 @@ export function CartLine({
           type="button"
           disabled={busy}
           onClick={() => onRemove(item.id)}
-          className="mt-3 text-[11px] uppercase tracking-[0.06em] text-[#757575] underline underline-offset-4 hover:text-[#ff5331] disabled:opacity-40"
+          className="mt-2 inline-flex min-h-[36px] items-center text-[11px] uppercase tracking-[0.06em] text-[#757575] underline underline-offset-4 hover:text-[#ff5331] disabled:opacity-40"
         >
           Remove
         </button>
       </div>
 
-      <QtyStepper
-        value={item.qty}
-        min={0}
-        max={item.stockQty}
-        disabled={busy}
-        itemLabel={`${item.product.name} (${item.size})`}
-        onChange={(next) => onUpdateQty(item.id, next)}
-      />
+      <div className="col-span-2 flex flex-wrap items-center justify-between gap-3 pt-1 sm:contents">
+        <QtyStepper
+          value={item.qty}
+          min={0}
+          max={item.stockQty}
+          disabled={busy}
+          itemLabel={`${item.product.name} (${item.size})`}
+          onChange={(next) => onUpdateQty(item.id, next)}
+        />
 
-      <strong className="whitespace-nowrap">{formatNairaCompact(lineTotalKobo)}</strong>
+        <strong className="whitespace-nowrap font-sans text-base font-bold text-[#ff660c] sm:text-right sm:text-[0.95rem]">
+          {formatNairaCompact(lineTotalKobo)}
+        </strong>
+      </div>
     </article>
   )
 }

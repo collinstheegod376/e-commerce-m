@@ -162,19 +162,19 @@ export function OrderConfirmationClient({ order }: OrderConfirmationClientProps)
   const totalUnits = order.items.reduce((sum, item) => sum + item.qty, 0)
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8 animate-mk-fade-up">
+    <div className="mx-auto w-full min-w-0 max-w-4xl space-y-6 sm:space-y-8 animate-mk-fade-up">
       {/* Celebratory Hero Confirmation Card */}
-      <section className="relative overflow-hidden rounded-2xl border border-[#ff660c]/30 bg-[#041b26] p-6 shadow-2xl sm:p-10">
+      <section className="relative w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-[#ff660c]/30 bg-[#041b26] p-4 shadow-2xl sm:p-10">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#ff660c]/12 blur-3xl"
         />
 
-        <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2.5">
+        <div className="relative flex min-w-0 flex-col gap-5 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+          <div className="min-w-0 flex-1 space-y-4">
+            <div className="flex min-w-0 items-center gap-2.5">
               <span
-                className={`flex h-12 w-12 items-center justify-center rounded-full border ${
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border sm:h-12 sm:w-12 ${
                   isPending
                     ? 'border-[#ff660c]/50 bg-[#ff660c]/15 text-[#ff660c]'
                     : isFailed
@@ -184,16 +184,16 @@ export function OrderConfirmationClient({ order }: OrderConfirmationClientProps)
               >
                 {isPending ? (
                   isPolling ? (
-                    <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
+                    <Loader2 className="h-5 w-5 animate-spin sm:h-6 sm:w-6" aria-hidden="true" />
                   ) : (
-                    <Clock className="h-6 w-6" aria-hidden="true" />
+                    <Clock className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
                   )
                 ) : (
-                  <CheckCircle2 className="h-6 w-6 stroke-[2.25]" aria-hidden="true" />
+                  <CheckCircle2 className="h-5 w-5 stroke-[2.25] sm:h-6 sm:w-6" aria-hidden="true" />
                 )}
               </span>
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#ff660c]">
+              <div className="min-w-0">
+                <p className="break-words text-[11px] font-bold uppercase tracking-[0.18em] text-[#ff660c]">
                   {isPending
                     ? 'Verifying Payment'
                     : isFailed
@@ -209,7 +209,7 @@ export function OrderConfirmationClient({ order }: OrderConfirmationClientProps)
               </div>
             </div>
 
-            <h1 className="font-brush text-3xl uppercase leading-none tracking-wide text-[#f8fafc] sm:text-5xl">
+            <h1 className="break-words font-brush text-2xl uppercase leading-tight tracking-wide text-[#f8fafc] sm:text-5xl sm:leading-none">
               {isPending
                 ? 'Confirming Your Order'
                 : isFailed
@@ -217,7 +217,7 @@ export function OrderConfirmationClient({ order }: OrderConfirmationClientProps)
                   : 'Thank You for Your Order'}
             </h1>
 
-            <p className="max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base">
+            <p className="max-w-2xl break-words text-sm leading-relaxed text-slate-300 sm:text-base">
               {isPending
                 ? 'We are confirming your Paystack transaction right now. This page updates automatically as soon as payment clears.'
                 : isFailed
@@ -227,13 +227,13 @@ export function OrderConfirmationClient({ order }: OrderConfirmationClientProps)
 
             {/* Email Receipt Notice */}
             {!isFailed ? (
-              <div className="inline-flex flex-wrap items-center gap-2 rounded-lg border border-white/10 bg-[#01121a]/80 px-3.5 py-2.5 text-xs text-slate-300">
-                <Mail className="h-4 w-4 shrink-0 text-[#ff660c]" aria-hidden="true" />
-                <span>
+              <div className="flex max-w-full items-start gap-2 rounded-lg border border-white/10 bg-[#01121a]/80 px-3 py-2.5 text-xs text-slate-300 sm:inline-flex sm:items-center sm:px-3.5">
+                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-[#ff660c] sm:mt-0" aria-hidden="true" />
+                <span className="min-w-0 break-words">
                   {isPending
                     ? 'A receipt will be sent to '
                     : 'An email receipt has been sent to '}
-                  <strong className="font-semibold text-[#f8fafc]">
+                  <strong className="break-all font-semibold text-[#f8fafc]">
                     {order.customerEmail}
                   </strong>
                 </span>
@@ -245,7 +245,7 @@ export function OrderConfirmationClient({ order }: OrderConfirmationClientProps)
               <div className="flex flex-wrap items-center gap-3 pt-1">
                 {isPolling ? (
                   <span className="inline-flex items-center gap-2 text-xs font-medium text-[#ff8a47]">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                    <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin" aria-hidden="true" />
                     Checking Paystack confirmation ({pollCount}/{MAX_POLL_ATTEMPTS})…
                   </span>
                 ) : (
@@ -256,7 +256,7 @@ export function OrderConfirmationClient({ order }: OrderConfirmationClientProps)
                     className="inline-flex items-center gap-2 rounded-md border border-[#ff660c]/60 bg-[#ff660c]/15 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#ff660c] transition-colors hover:bg-[#ff660c] hover:text-[#01121a] disabled:opacity-50"
                   >
                     <RefreshCw
-                      className={`h-3.5 w-3.5 ${manualChecking ? 'animate-spin' : ''}`}
+                      className={`h-3.5 w-3.5 shrink-0 ${manualChecking ? 'animate-spin' : ''}`}
                       aria-hidden="true"
                     />
                     {manualChecking ? 'Checking…' : 'Check Payment Status'}
@@ -267,19 +267,19 @@ export function OrderConfirmationClient({ order }: OrderConfirmationClientProps)
           </div>
 
           {/* Order Reference Chip */}
-          <div className="shrink-0 rounded-xl border border-white/12 bg-[#01121a]/90 p-4 sm:min-w-[220px]">
+          <div className="w-full min-w-0 rounded-xl border border-white/12 bg-[#01121a]/90 p-3.5 sm:w-auto sm:min-w-[220px] sm:shrink-0 sm:p-4">
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
               Order Reference
             </p>
-            <div className="mt-1.5 flex items-center justify-between gap-2">
-              <span className="font-mono text-sm font-bold text-[#ff660c]">
+            <div className="mt-1.5 flex min-w-0 items-center justify-between gap-2">
+              <span className="min-w-0 break-all font-mono text-xs font-bold text-[#ff660c] sm:text-sm">
                 {order.reference}
               </span>
               <button
                 type="button"
                 onClick={handleCopyReference}
                 aria-label="Copy order reference"
-                className="inline-flex h-7 w-7 items-center justify-center rounded border border-white/15 bg-[#041b26] text-slate-300 transition-colors hover:border-[#ff660c] hover:text-[#ff660c]"
+                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-white/15 bg-[#041b26] text-slate-300 transition-colors hover:border-[#ff660c] hover:text-[#ff660c]"
               >
                 {copiedRef ? (
                   <Check className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
@@ -303,30 +303,30 @@ export function OrderConfirmationClient({ order }: OrderConfirmationClientProps)
       />
 
       {/* Order Summary & Itemized Receipt */}
-      <section className="rounded-2xl border border-white/12 bg-[#041b26] p-6 sm:p-8">
+      <section className="w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-white/12 bg-[#041b26] p-4 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
-          <div className="flex items-center gap-2.5">
-            <Package className="h-5 w-5 text-[#ff660c]" aria-hidden="true" />
+          <div className="flex min-w-0 items-center gap-2.5">
+            <Package className="h-5 w-5 shrink-0 text-[#ff660c]" aria-hidden="true" />
             <h2 className="font-display text-lg font-bold text-[#f8fafc]">
               Order Summary
             </h2>
           </div>
-          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[#ff660c]">
+          <span className="shrink-0 text-xs font-semibold uppercase tracking-[0.16em] text-[#ff660c]">
             {totalUnits} {totalUnits === 1 ? 'Piece' : 'Pieces'}
           </span>
         </div>
 
         {/* Metadata Grid */}
-        <div className="mt-5 grid gap-4 border-b border-white/10 pb-6 sm:grid-cols-3">
-          <div>
+        <div className="mt-5 grid min-w-0 gap-4 border-b border-white/10 pb-6 sm:grid-cols-3">
+          <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
               Order Date
             </p>
-            <p className="mt-1 text-sm font-medium text-[#f8fafc]">
+            <p className="mt-1 break-words text-sm font-medium text-[#f8fafc]">
               {formatLagosDate(order.createdAt)}
             </p>
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
               Contact Email
             </p>
@@ -334,12 +334,12 @@ export function OrderConfirmationClient({ order }: OrderConfirmationClientProps)
               {order.customerEmail}
             </p>
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-              <MapPin className="h-3 w-3 text-[#ff660c]" aria-hidden="true" />
+              <MapPin className="h-3 w-3 shrink-0 text-[#ff660c]" aria-hidden="true" />
               Delivery Address
             </p>
-            <p className="mt-1 text-sm font-medium leading-snug text-[#f8fafc]">
+            <p className="mt-1 break-words text-sm font-medium leading-snug text-[#f8fafc]">
               {order.shippingAddressText}
             </p>
           </div>
@@ -350,17 +350,17 @@ export function OrderConfirmationClient({ order }: OrderConfirmationClientProps)
           {order.items.map((item) => (
             <div
               key={item.id}
-              className="flex flex-col gap-1.5 py-3.5 sm:flex-row sm:items-center sm:justify-between"
+              className="flex min-w-0 flex-col gap-1.5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
             >
-              <div>
-                <p className="font-display text-sm font-semibold text-[#f8fafc] sm:text-base">
+              <div className="min-w-0 flex-1">
+                <p className="break-words font-display text-sm font-semibold text-[#f8fafc] sm:text-base">
                   {item.productNameSnap}
                 </p>
-                <p className="mt-0.5 text-xs uppercase tracking-[0.12em] text-slate-400">
+                <p className="mt-0.5 break-words text-xs uppercase tracking-[0.12em] text-slate-400">
                   Size {item.sizeSnap} · Qty {item.qty} · {formatNaira(item.unitPriceKobo)} each
                 </p>
               </div>
-              <p className="text-sm font-bold text-[#f8fafc] sm:text-right">
+              <p className="shrink-0 text-sm font-bold text-[#f8fafc] sm:text-right">
                 {formatNaira(item.unitPriceKobo * item.qty)}
               </p>
             </div>
@@ -369,19 +369,19 @@ export function OrderConfirmationClient({ order }: OrderConfirmationClientProps)
 
         {/* Totals Breakdown */}
         <div className="mt-5 space-y-2.5 border-t border-white/12 pt-5 text-sm">
-          <div className="flex items-center justify-between text-slate-300">
+          <div className="flex items-center justify-between gap-3 text-slate-300">
             <span>Subtotal</span>
-            <span>{formatNaira(order.subtotalKobo)}</span>
+            <span className="shrink-0">{formatNaira(order.subtotalKobo)}</span>
           </div>
-          <div className="flex items-center justify-between text-slate-300">
+          <div className="flex items-center justify-between gap-3 text-slate-300">
             <span>Shipping</span>
-            <span>
+            <span className="shrink-0">
               {order.shippingKobo === 0 ? 'Complimentary' : formatNaira(order.shippingKobo)}
             </span>
           </div>
-          <div className="flex items-center justify-between border-t border-white/10 pt-3.5 text-base font-bold text-[#f8fafc]">
+          <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-3.5 text-base font-bold text-[#f8fafc]">
             <span>{isPending ? 'Total Due' : 'Total Paid'}</span>
-            <span className="text-lg text-[#ff660c]">{formatNaira(order.totalKobo)}</span>
+            <span className="shrink-0 text-lg text-[#ff660c]">{formatNaira(order.totalKobo)}</span>
           </div>
         </div>
       </section>
@@ -390,17 +390,17 @@ export function OrderConfirmationClient({ order }: OrderConfirmationClientProps)
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Link
           href="/profile"
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#ff660c] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.16em] text-[#01121a] transition-all hover:-translate-y-0.5 hover:bg-[#ff7a2e] hover:shadow-[0_10px_25px_rgba(255,102,12,0.3)]"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#ff660c] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.16em] text-[#01121a] transition-all hover:-translate-y-0.5 hover:bg-[#ff7a2e] hover:shadow-[0_10px_25px_rgba(255,102,12,0.3)] sm:w-auto"
         >
           <span>View Order History</span>
-          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
         </Link>
 
         <Link
           href="/"
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/18 bg-[#041b26] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.16em] text-[#f8fafc] transition-all hover:border-[#ff660c] hover:text-[#ff660c]"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/18 bg-[#041b26] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.16em] text-[#f8fafc] transition-all hover:border-[#ff660c] hover:text-[#ff660c] sm:w-auto"
         >
-          <ShoppingBag className="h-4 w-4" aria-hidden="true" />
+          <ShoppingBag className="h-4 w-4 shrink-0" aria-hidden="true" />
           <span>Continue Shopping</span>
         </Link>
       </div>

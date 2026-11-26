@@ -177,30 +177,30 @@ export function OrderTrackingStepper({
         : 'border-orange-200 bg-orange-50 text-[#d94f04]'
 
   return (
-    <div className={`${containerClasses} ${paddingClasses} ${className}`}>
+    <div className={`w-full min-w-0 max-w-full overflow-hidden ${containerClasses} ${paddingClasses} ${className}`}>
       {showHeader ? (
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
+        <div className="mb-5 flex min-w-0 flex-col gap-3 sm:mb-6 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 flex-1">
             <h3
-              className={`font-display text-base font-bold tracking-tight sm:text-lg ${headingClass}`}
+              className={`break-words font-display text-base font-bold tracking-tight sm:text-lg ${headingClass}`}
             >
               Order Delivery Status
             </h3>
-            <p className={`mt-1 text-xs leading-relaxed sm:text-sm ${subtitleClass}`}>
+            <p className={`mt-1 break-words text-xs leading-relaxed sm:text-sm ${subtitleClass}`}>
               Here you can check the status of your delivery with the estimated delivery time.
             </p>
           </div>
           <span
-            className={`inline-flex shrink-0 items-center gap-1.5 self-start rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] ${badgeClasses}`}
+            className={`inline-flex max-w-full shrink-0 items-center gap-1.5 self-start rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${badgeClasses}`}
           >
             {isException ? (
-              <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             ) : isDelivered ? (
-              <PackageCheck className="h-3.5 w-3.5" aria-hidden="true" />
+              <PackageCheck className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             ) : (
-              <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" aria-hidden="true" />
             )}
-            {statusLabel}
+            <span className="break-words">{statusLabel}</span>
           </span>
         </div>
       ) : null}
@@ -310,7 +310,7 @@ export function OrderTrackingStepper({
       </div>
 
       {/* Mobile Vertical Stepper (below md) */}
-      <ol className="flex flex-col md:hidden">
+      <ol className="flex min-w-0 flex-col md:hidden">
         {ORDER_TRACKING_STAGES.map((stage, idx) => {
           const state = states[idx]
           const isLast = idx === ORDER_TRACKING_STAGES.length - 1
@@ -351,9 +351,9 @@ export function OrderTrackingStepper({
             <li
               key={stage.key}
               aria-current={state === 'current' ? 'step' : undefined}
-              className="flex gap-3.5"
+              className="flex min-w-0 gap-3"
             >
-              <div className="flex flex-col items-center">
+              <div className="flex shrink-0 flex-col items-center">
                 <div
                   className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 transition-all ${nodeClasses}`}
                 >
@@ -375,10 +375,10 @@ export function OrderTrackingStepper({
                 ) : null}
               </div>
 
-              <div className={`pt-1 ${isLast ? 'pb-0' : 'pb-5'}`}>
-                <p className={`text-sm leading-tight ${labelClasses}`}>{stage.label}</p>
+              <div className={`min-w-0 flex-1 pt-1 ${isLast ? 'pb-0' : 'pb-5'}`}>
+                <p className={`break-words text-sm leading-tight ${labelClasses}`}>{stage.label}</p>
                 <p
-                  className={`mt-0.5 text-xs leading-relaxed ${
+                  className={`mt-0.5 break-words text-xs leading-relaxed ${
                     isDark ? 'text-slate-400' : 'text-slate-500'
                   }`}
                 >
@@ -386,16 +386,18 @@ export function OrderTrackingStepper({
                 </p>
                 {formattedTime ? (
                   <p
-                    className={`mt-1 text-[11px] font-medium ${
+                    className={`mt-1 break-words text-[11px] font-medium ${
                       isDark ? 'text-slate-300' : 'text-slate-600'
                     }`}
                   >
                     {formattedTime}
                   </p>
                 ) : expectedText ? (
-                  <p className="mt-1 text-[11px] font-semibold text-[#ff660c]">{expectedText}</p>
+                  <p className="mt-1 break-words text-[11px] font-semibold text-[#ff660c]">
+                    {expectedText}
+                  </p>
                 ) : state === 'current' ? (
-                  <p className="mt-1 text-[11px] font-medium text-[#ff660c]">
+                  <p className="mt-1 break-words text-[11px] font-medium text-[#ff660c]">
                     {status === 'pending' ? 'Awaiting payment' : 'In progress'}
                   </p>
                 ) : null}
@@ -407,13 +409,13 @@ export function OrderTrackingStepper({
 
       {/* Helper Guidance Footer */}
       <div
-        className={`mt-6 flex flex-col gap-1 border-t pt-4 text-xs leading-relaxed sm:flex-row sm:items-center sm:justify-between ${
+        className={`mt-5 flex min-w-0 flex-col gap-2 border-t pt-4 text-xs leading-relaxed sm:mt-6 sm:flex-row sm:items-center sm:justify-between ${
           isDark
             ? 'border-white/10 text-slate-300'
             : 'border-slate-200/80 text-slate-600'
         }`}
       >
-        <p>{guidance}</p>
+        <p className="min-w-0 break-words">{guidance}</p>
         {isDark ? (
           <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
             Live Studio Tracker

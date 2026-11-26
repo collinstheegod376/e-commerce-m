@@ -15,11 +15,11 @@ function MkMonogramBadge() {
   return (
     <span
       aria-hidden="true"
-      className="flex h-9 w-9 shrink-0 items-center justify-center border border-[#ff660c]/60 bg-[#ff660c]/10 text-[#ff660c] transition-all duration-300 group-hover:border-[#ff660c] group-hover:bg-[#ff660c] group-hover:text-[#01121a]"
+      className="flex h-8 w-8 shrink-0 items-center justify-center border border-[#ff660c]/60 bg-[#ff660c]/10 text-[#ff660c] transition-all duration-300 group-hover:border-[#ff660c] group-hover:bg-[#ff660c] group-hover:text-[#01121a] sm:h-9 sm:w-9"
     >
       <svg
         viewBox="0 0 32 32"
-        className="h-5 w-5"
+        className="h-4 w-4 sm:h-5 sm:w-5"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -157,15 +157,15 @@ export function StorefrontHeader({
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#01121a]/90 backdrop-blur-md transition-all duration-300">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-4 py-4 sm:px-8 lg:px-12">
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-8 sm:py-4 lg:px-12">
           {/* Left — Brand Wordmark + Geometric MK Monogram */}
           <Link
             href="/"
             onClick={() => setMobileMenuOpen(false)}
-            className="group inline-flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff660c] focus-visible:ring-offset-2 focus-visible:ring-offset-[#01121a]"
+            className="group inline-flex min-w-0 shrink items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff660c] focus-visible:ring-offset-2 focus-visible:ring-offset-[#01121a] sm:gap-3"
           >
             <MkMonogramBadge />
-            <span className="font-display text-lg font-bold uppercase tracking-[0.18em] text-[#ff660c] transition-colors duration-300 group-hover:text-white sm:text-xl">
+            <span className="font-display whitespace-nowrap text-sm font-bold uppercase tracking-[0.12em] text-[#ff660c] transition-colors duration-300 group-hover:text-white sm:text-xl sm:tracking-[0.18em]">
               Maison Kriss
             </span>
           </Link>
@@ -194,20 +194,20 @@ export function StorefrontHeader({
           </nav>
 
           {/* Right — Actions + Mobile Hamburger Trigger */}
-          <div className="flex items-center gap-2.5 sm:gap-3.5">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-3.5">
             <Link
               href="/cart"
               onClick={() => setMobileMenuOpen(false)}
               aria-label={`Cart with ${cartCount} items`}
-              className={`group relative inline-flex h-10 w-10 items-center justify-center border transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ff660c] hover:text-[#ff660c] hover:shadow-[0_0_20px_rgba(255,102,12,0.28)] ${
+              className={`group relative inline-flex h-9 w-9 items-center justify-center border transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ff660c] hover:text-[#ff660c] hover:shadow-[0_0_20px_rgba(255,102,12,0.28)] sm:h-10 sm:w-10 ${
                 pathname === '/cart'
                   ? 'border-[#ff660c] bg-[#ff660c]/15 text-[#ff660c]'
                   : 'border-white/15 bg-[#041b26] text-[#f8fafc]'
               }`}
             >
-              <ShoppingBag className="h-[18px] w-[18px] transition-transform duration-200 group-hover:scale-105" />
+              <ShoppingBag className="h-[17px] w-[17px] transition-transform duration-200 group-hover:scale-105 sm:h-[18px] sm:w-[18px]" />
               {cartCount > 0 ? (
-                <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#ff660c] px-1 text-[10px] font-bold leading-none text-[#01121a] shadow-sm">
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#ff660c] px-1 text-[10px] font-bold leading-none text-[#01121a] shadow-sm sm:-right-1.5 sm:-top-1.5 sm:h-5 sm:min-w-[20px]">
                   {cartCount}
                 </span>
               ) : null}
@@ -217,13 +217,13 @@ export function StorefrontHeader({
               href="/profile"
               onClick={() => setMobileMenuOpen(false)}
               aria-label={firstName ? `Profile (${firstName})` : 'Profile'}
-              className={`inline-flex h-10 items-center justify-center gap-2 border px-2.5 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ff660c] hover:text-[#ff660c] sm:px-3 ${
+              className={`inline-flex h-9 w-9 items-center justify-center gap-2 border transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ff660c] hover:text-[#ff660c] sm:h-10 sm:w-auto sm:px-3 ${
                 pathname === '/profile'
                   ? 'border-[#ff660c] bg-[#ff660c]/15 text-[#ff660c]'
                   : 'border-white/15 bg-[#041b26] text-[#f8fafc]'
               }`}
             >
-              <User className="h-[18px] w-[18px] shrink-0" />
+              <User className="h-[17px] w-[17px] shrink-0 sm:h-[18px] sm:w-[18px]" />
               {firstName ? (
                 <span className="hidden max-w-[110px] truncate text-xs font-medium uppercase tracking-[0.14em] lg:inline">
                   {firstName}
@@ -237,7 +237,7 @@ export function StorefrontHeader({
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-storefront-drawer"
               aria-label="Toggle navigation menu"
-              className={`relative inline-flex h-10 w-10 items-center justify-center border p-2.5 transition-all duration-200 hover:border-[#ff660c] hover:text-[#ff660c] md:hidden ${
+              className={`relative inline-flex h-9 w-9 items-center justify-center border p-2 transition-all duration-200 hover:border-[#ff660c] hover:text-[#ff660c] sm:h-10 sm:w-10 sm:p-2.5 md:hidden ${
                 mobileMenuOpen
                   ? 'border-[#ff660c] bg-[#ff660c]/15 text-[#ff660c]'
                   : 'border-white/15 bg-[#041b26] text-white'
@@ -379,9 +379,9 @@ export function StorefrontHeader({
             </Link>
           </div>
 
-          <div className="flex items-center justify-between border-t border-white/10 pt-4 text-[11px] uppercase tracking-[0.18em] text-[#94a3b8]">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-4 text-[11px] uppercase tracking-[0.16em] text-[#94a3b8]">
             <span className="inline-flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#ff660c]" aria-hidden="true" />
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#ff660c]" aria-hidden="true" />
               Lagos Studio · 11 NOV Edition
             </span>
             <span className="font-semibold text-[#ff660c]">MK</span>

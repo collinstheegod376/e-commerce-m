@@ -168,9 +168,9 @@ function ExpandedOrderDrawer({ order }: { order: AdminOrderRowData }) {
   }
 
   return (
-    <div className="border-t border-[#e2e2de] bg-[#fafaf8] px-5 py-5 space-y-5">
+    <div className="min-w-0 max-w-full border-t border-[#e2e2de] bg-[#fafaf8] px-3 py-4 space-y-4 sm:px-5 sm:py-5 sm:space-y-5">
       {/* Top: 5-stage visual delivery status stepper */}
-      <div className="border border-[#e2e2de] bg-white p-4">
+      <div className="min-w-0 max-w-full overflow-hidden border border-[#e2e2de] bg-white p-3 sm:p-4">
         <OrderStatusStepper
           status={liveStatus}
           trackingMeta={liveTrackingMeta}
@@ -179,11 +179,11 @@ function ExpandedOrderDrawer({ order }: { order: AdminOrderRowData }) {
       </div>
 
       {/* Main 2-column content */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-12">
         {/* Left: Interactive Admin Status Controls */}
-        <div className="border border-[#e2e2de] bg-white p-4 lg:col-span-7 space-y-4">
+        <div className="min-w-0 border border-[#e2e2de] bg-white p-3.5 sm:p-4 lg:col-span-7 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#f0f0ec] pb-3">
-            <div>
+            <div className="min-w-0">
               <h3 className="text-xs font-bold uppercase tracking-[0.06em] text-[#030304]">
                 Order Status Controls
               </h3>
@@ -196,8 +196,8 @@ function ExpandedOrderDrawer({ order }: { order: AdminOrderRowData }) {
 
           {/* Quick primary "Next Step" CTA */}
           {quickAction ? (
-            <div className="flex flex-wrap items-center justify-between gap-3 border border-amber-200 bg-amber-50/70 px-3.5 py-3">
-              <div className="space-y-0.5">
+            <div className="flex flex-col gap-3 border border-amber-200 bg-amber-50/70 px-3.5 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+              <div className="min-w-0 space-y-0.5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-amber-900">
                   Recommended Next Step
                 </p>
@@ -211,10 +211,10 @@ function ExpandedOrderDrawer({ order }: { order: AdminOrderRowData }) {
                 type="button"
                 disabled={busy}
                 onClick={() => submitStatusUpdate(quickAction.nextStatus)}
-                className="inline-flex items-center gap-1.5 bg-[#030304] px-4 py-2 text-xs font-semibold uppercase tracking-[0.06em] text-white transition-colors hover:bg-[#ff660c] disabled:opacity-50"
+                className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 bg-[#030304] px-4 py-2 text-xs font-semibold uppercase tracking-[0.06em] text-white transition-colors hover:bg-[#ff660c] disabled:opacity-50 sm:min-h-0 sm:w-auto"
               >
                 {busy ? 'Updating…' : quickAction.label}
-                <ArrowRight className="h-3.5 w-3.5" />
+                <ArrowRight className="h-3.5 w-3.5 shrink-0" />
               </button>
             </div>
           ) : null}
@@ -228,7 +228,7 @@ function ExpandedOrderDrawer({ order }: { order: AdminOrderRowData }) {
             className="space-y-3"
           >
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <label className="block">
+              <label className="block min-w-0">
                 <span className="block text-[11px] font-medium uppercase tracking-[0.06em] text-[#6a6a6a]">
                   Set Status (Any Stage)
                 </span>
@@ -236,7 +236,7 @@ function ExpandedOrderDrawer({ order }: { order: AdminOrderRowData }) {
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
                   disabled={busy}
-                  className="mt-1 w-full border border-[#d6d6d6] bg-white px-3 py-2 text-xs text-[#030304] outline-none focus:border-[#030304]"
+                  className="mt-1 min-h-[44px] w-full border border-[#d6d6d6] bg-white px-3 py-2 text-base text-[#030304] outline-none focus:border-[#030304] sm:min-h-0 sm:text-xs"
                 >
                   {ADMIN_STATUS_SELECT_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -246,7 +246,7 @@ function ExpandedOrderDrawer({ order }: { order: AdminOrderRowData }) {
                 </select>
               </label>
 
-              <label className="block">
+              <label className="block min-w-0">
                 <span className="block text-[11px] font-medium uppercase tracking-[0.06em] text-[#6a6a6a]">
                   Estimated Delivery (Optional)
                 </span>
@@ -257,12 +257,12 @@ function ExpandedOrderDrawer({ order }: { order: AdminOrderRowData }) {
                   disabled={busy}
                   placeholder="Expected Jan 27 Wednesday"
                   maxLength={120}
-                  className="mt-1 w-full border border-[#d6d6d6] bg-white px-3 py-2 text-xs text-[#030304] outline-none focus:border-[#030304]"
+                  className="mt-1 min-h-[44px] w-full border border-[#d6d6d6] bg-white px-3 py-2 text-base text-[#030304] outline-none focus:border-[#030304] sm:min-h-0 sm:text-xs"
                 />
               </label>
             </div>
 
-            <label className="block">
+            <label className="block min-w-0">
               <span className="block text-[11px] font-medium uppercase tracking-[0.06em] text-[#6a6a6a]">
                 Internal / Courier Note (Optional)
               </span>
@@ -273,16 +273,18 @@ function ExpandedOrderDrawer({ order }: { order: AdminOrderRowData }) {
                 disabled={busy}
                 placeholder="Courier tracking ID, dispatch note, or reason…"
                 maxLength={300}
-                className="mt-1 w-full border border-[#d6d6d6] bg-white px-3 py-2 text-xs text-[#030304] outline-none focus:border-[#030304]"
+                className="mt-1 min-h-[44px] w-full border border-[#d6d6d6] bg-white px-3 py-2 text-base text-[#030304] outline-none focus:border-[#030304] sm:min-h-0 sm:text-xs"
               />
             </label>
 
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-[#6a6a6a]">
+            <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+              <span className="inline-flex min-w-0 items-start gap-1.5 break-words text-[11px] text-[#6a6a6a] sm:items-center">
                 {statusSendsEmail(selectedStatus, liveStatus) ? (
                   <>
-                    <Mail className="h-3.5 w-3.5 text-indigo-600" />
-                    Sends status email to {order.customerEmail}
+                    <Mail className="mt-0.5 h-3.5 w-3.5 shrink-0 text-indigo-600 sm:mt-0" />
+                    <span className="break-all sm:break-words">
+                      Sends status email to {order.customerEmail}
+                    </span>
                   </>
                 ) : selectedStatus === 'refunded' ? (
                   'Initiates Paystack refund for this transaction'
@@ -294,7 +296,7 @@ function ExpandedOrderDrawer({ order }: { order: AdminOrderRowData }) {
               <button
                 type="submit"
                 disabled={busy}
-                className="border border-[#030304] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.06em] text-[#030304] transition-colors hover:bg-[#030304] hover:text-white disabled:opacity-50"
+                className="min-h-[44px] w-full border border-[#030304] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.06em] text-[#030304] transition-colors hover:bg-[#030304] hover:text-white disabled:opacity-50 sm:min-h-0 sm:w-auto"
               >
                 {busy ? 'Saving…' : 'Update Status'}
               </button>
@@ -305,7 +307,7 @@ function ExpandedOrderDrawer({ order }: { order: AdminOrderRowData }) {
           {feedback ? (
             <div
               role={feedback.type === 'error' ? 'alert' : 'status'}
-              className={`flex items-center gap-2 border-l-2 px-3 py-2 text-xs ${
+              className={`flex items-center gap-2 break-words border-l-2 px-3 py-2 text-xs ${
                 feedback.type === 'success'
                   ? 'border-emerald-600 bg-emerald-50 text-emerald-900'
                   : 'border-[#ff5331] bg-[#fff5f2] text-[#030304]'
@@ -320,11 +322,11 @@ function ExpandedOrderDrawer({ order }: { order: AdminOrderRowData }) {
         </div>
 
         {/* Right: Customer, Shipping & Itemized Order Details */}
-        <div className="border border-[#e2e2de] bg-white p-4 lg:col-span-5 flex flex-col justify-between space-y-4">
-          <div className="space-y-4">
+        <div className="min-w-0 border border-[#e2e2de] bg-white p-3.5 sm:p-4 lg:col-span-5 flex flex-col justify-between space-y-4">
+          <div className="min-w-0 space-y-4">
             {/* Customer & Address */}
             <div className="space-y-2 border-b border-[#f0f0ec] pb-3">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-xs font-bold uppercase tracking-[0.06em] text-[#030304]">
                   Customer &amp; Delivery
                 </h3>
@@ -335,41 +337,43 @@ function ExpandedOrderDrawer({ order }: { order: AdminOrderRowData }) {
                 ) : null}
               </div>
 
-              <div className="space-y-1 text-xs text-[#4a4a4a]">
-                <p className="flex items-center gap-1.5 font-medium text-[#030304]">
+              <div className="min-w-0 space-y-1 text-xs text-[#4a4a4a]">
+                <p className="flex items-center gap-1.5 font-medium text-[#030304] break-words">
                   <User className="h-3.5 w-3.5 shrink-0 text-[#8a8a8a]" />
-                  {order.customerName || order.customerEmail}
+                  <span className="min-w-0 break-words">
+                    {order.customerName || order.customerEmail}
+                  </span>
                 </p>
                 <p className="flex items-center gap-1.5">
                   <Mail className="h-3.5 w-3.5 shrink-0 text-[#8a8a8a]" />
-                  {order.customerEmail}
+                  <span className="min-w-0 break-all">{order.customerEmail}</span>
                 </p>
                 {order.customerPhone ? (
                   <p className="flex items-center gap-1.5">
                     <Phone className="h-3.5 w-3.5 shrink-0 text-[#8a8a8a]" />
-                    {order.customerPhone}
+                    <span className="min-w-0 break-words">{order.customerPhone}</span>
                   </p>
                 ) : null}
                 <p className="flex items-start gap-1.5 pt-1 text-[11px] leading-relaxed text-[#4a4a4a]">
                   <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#8a8a8a]" />
-                  <span>{order.shippingAddressFormatted}</span>
+                  <span className="min-w-0 break-words">{order.shippingAddressFormatted}</span>
                 </p>
               </div>
             </div>
 
             {/* Itemized Order Table */}
-            <div>
+            <div className="min-w-0">
               <h4 className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#6a6a6a]">
                 <Package className="h-3.5 w-3.5" />
                 Items ({order.itemCount})
               </h4>
-              <div className="mt-2 overflow-x-auto">
+              <div className="mt-2 max-w-full overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="border-b border-[#ecece8] text-[10px] uppercase text-[#757575]">
                     <tr>
-                      <th className="pb-1.5 font-medium">Product</th>
-                      <th className="pb-1.5 font-medium">Size</th>
-                      <th className="pb-1.5 font-medium text-right">Qty</th>
+                      <th className="pb-1.5 pr-2 font-medium">Product</th>
+                      <th className="pb-1.5 pr-2 font-medium">Size</th>
+                      <th className="pb-1.5 pr-2 font-medium text-right">Qty</th>
                       <th className="pb-1.5 font-medium text-right">Price</th>
                     </tr>
                   </thead>
@@ -379,9 +383,13 @@ function ExpandedOrderDrawer({ order }: { order: AdminOrderRowData }) {
                         <td className="py-1.5 pr-2 font-medium text-[#030304]">
                           {item.productNameSnap}
                         </td>
-                        <td className="py-1.5 pr-2 text-[#4a4a4a]">{item.sizeSnap}</td>
-                        <td className="py-1.5 pr-2 text-right text-[#4a4a4a]">{item.qty}</td>
-                        <td className="py-1.5 text-right font-medium text-[#030304]">
+                        <td className="py-1.5 pr-2 whitespace-nowrap text-[#4a4a4a]">
+                          {item.sizeSnap}
+                        </td>
+                        <td className="py-1.5 pr-2 text-right whitespace-nowrap text-[#4a4a4a]">
+                          {item.qty}
+                        </td>
+                        <td className="py-1.5 text-right whitespace-nowrap font-medium text-[#030304]">
                           {formatNaira(item.unitPriceKobo * item.qty)}
                         </td>
                       </tr>
@@ -391,17 +399,17 @@ function ExpandedOrderDrawer({ order }: { order: AdminOrderRowData }) {
               </div>
 
               <div className="mt-2.5 space-y-1 border-t border-[#ecece8] pt-2 text-[11px]">
-                <div className="flex justify-between text-[#6a6a6a]">
+                <div className="flex justify-between gap-2 text-[#6a6a6a]">
                   <span>Subtotal</span>
-                  <span>{formatNaira(order.subtotalKobo)}</span>
+                  <span className="whitespace-nowrap">{formatNaira(order.subtotalKobo)}</span>
                 </div>
-                <div className="flex justify-between text-[#6a6a6a]">
+                <div className="flex justify-between gap-2 text-[#6a6a6a]">
                   <span>Shipping</span>
-                  <span>{formatNaira(order.shippingKobo)}</span>
+                  <span className="whitespace-nowrap">{formatNaira(order.shippingKobo)}</span>
                 </div>
-                <div className="flex justify-between pt-1 text-xs font-bold text-[#030304]">
+                <div className="flex justify-between gap-2 pt-1 text-xs font-bold text-[#030304]">
                   <span>Total</span>
-                  <span>{formatNaira(order.totalKobo)}</span>
+                  <span className="whitespace-nowrap">{formatNaira(order.totalKobo)}</span>
                 </div>
               </div>
             </div>
@@ -411,7 +419,7 @@ function ExpandedOrderDrawer({ order }: { order: AdminOrderRowData }) {
           <div className="border-t border-[#f0f0ec] pt-3">
             <Link
               href={`/admin/orders/${order.id}`}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#030304] underline underline-offset-4 transition-colors hover:text-[#ff660c]"
+              className="inline-flex min-h-[36px] items-center gap-1.5 text-xs font-semibold text-[#030304] underline underline-offset-4 transition-colors hover:text-[#ff660c]"
             >
               Open Full Audit Page →
               <ExternalLink className="h-3 w-3" />
@@ -434,32 +442,22 @@ export function AdminOrdersTableClient({ orders }: { orders: AdminOrderRowData[]
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left text-xs">
-        <thead className="border-b border-[#e2e2de] bg-[#fafaf8] text-[11px] uppercase text-[#6a6a6a]">
-          <tr>
-            <th className="w-10 px-3 py-3.5 font-medium" aria-label="Expand row" />
-            <th className="px-4 py-3.5 font-medium">Reference</th>
-            <th className="px-4 py-3.5 font-medium">Date (WAT)</th>
-            <th className="px-4 py-3.5 font-medium">Customer</th>
-            <th className="px-4 py-3.5 font-medium">Items</th>
-            <th className="px-4 py-3.5 font-medium text-right">Total</th>
-            <th className="px-5 py-3.5 font-medium text-right">Status</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-[#f0f0ec]">
-          {orders.length > 0 ? (
-            orders.map((order) => {
-              const isExpanded = Boolean(expandedIds[order.id])
-              return (
-                <Fragment key={order.id}>
-                  <tr
-                    onClick={() => toggleRow(order.id)}
-                    className={`cursor-pointer transition-colors ${
-                      isExpanded ? 'bg-[#fafaf8]' : 'hover:bg-[#fafaf8]'
-                    }`}
-                  >
-                    <td className="px-3 py-3.5 text-center">
+    <div className="w-full max-w-full">
+      {/* Mobile Card List (< md) — zero horizontal scrolling needed to inspect & update orders */}
+      <div className="divide-y divide-[#e2e2de] md:hidden">
+        {orders.length > 0 ? (
+          orders.map((order) => {
+            const isExpanded = Boolean(expandedIds[order.id])
+            return (
+              <div key={order.id} className="min-w-0 max-w-full bg-white">
+                <div
+                  onClick={() => toggleRow(order.id)}
+                  className={`cursor-pointer p-4 transition-colors ${
+                    isExpanded ? 'bg-[#fafaf8]' : 'hover:bg-[#fafaf8]'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-start gap-2.5">
                       <button
                         type="button"
                         aria-expanded={isExpanded}
@@ -468,7 +466,7 @@ export function AdminOrdersTableClient({ orders }: { orders: AdminOrderRowData[]
                           e.stopPropagation()
                           toggleRow(order.id)
                         }}
-                        className="inline-flex h-6 w-6 items-center justify-center rounded text-[#6a6a6a] transition-colors hover:bg-[#ecece8] hover:text-[#030304]"
+                        className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded border border-[#e2e2de] bg-white text-[#6a6a6a] transition-colors hover:border-[#030304] hover:text-[#030304]"
                       >
                         <ChevronRight
                           className={`h-4 w-4 transition-transform duration-200 ${
@@ -476,53 +474,148 @@ export function AdminOrdersTableClient({ orders }: { orders: AdminOrderRowData[]
                           }`}
                         />
                       </button>
-                    </td>
-                    <td className="px-4 py-3.5 font-mono font-semibold">
-                      <Link
-                        href={`/admin/orders/${order.id}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="underline underline-offset-4 hover:text-[#ff5331]"
-                      >
-                        {order.reference}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3.5 text-[#4a4a4a]">
-                      {formatLagosDate(order.createdAt)}
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <div className="font-medium text-[#030304]">
+                      <div className="min-w-0">
+                        <Link
+                          href={`/admin/orders/${order.id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="font-mono text-xs font-semibold text-[#030304] underline underline-offset-4 hover:text-[#ff5331] break-all"
+                        >
+                          {order.reference}
+                        </Link>
+                        <p className="mt-1 text-[11px] text-[#6a6a6a]">
+                          {formatLagosDate(order.createdAt)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="shrink-0">
+                      <StatusBadge status={order.status} />
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap items-end justify-between gap-2 pl-[42px] text-xs">
+                    <div className="min-w-0">
+                      <div className="font-medium text-[#030304] break-words">
                         {order.customerName || order.customerEmail}
                       </div>
-                      <div className="text-[11px] text-[#757575]">{order.customerEmail}</div>
-                    </td>
-                    <td className="px-4 py-3.5 text-[#4a4a4a]">{order.itemCount}</td>
-                    <td className="px-4 py-3.5 text-right font-semibold text-[#030304]">
-                      {formatNaira(order.totalKobo)}
-                    </td>
-                    <td className="px-5 py-3.5 text-right">
-                      <StatusBadge status={order.status} />
-                    </td>
-                  </tr>
+                      <div className="text-[11px] text-[#757575] break-all">
+                        {order.customerEmail}
+                      </div>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <div className="font-semibold text-[#030304] whitespace-nowrap">
+                        {formatNaira(order.totalKobo)}
+                      </div>
+                      <div className="text-[11px] text-[#6a6a6a]">
+                        {order.itemCount} {order.itemCount === 1 ? 'item' : 'items'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-                  {isExpanded ? (
-                    <tr>
-                      <td colSpan={7} className="p-0">
-                        <ExpandedOrderDrawer order={order} />
+                {isExpanded ? <ExpandedOrderDrawer order={order} /> : null}
+              </div>
+            )
+          })
+        ) : (
+          <div className="px-4 py-10 text-center text-xs text-[#757575]">
+            No orders match your current filters.
+          </div>
+        )}
+      </div>
+
+      {/* Desktop / Tablet Expandable Table (md+) — scroll safely contained */}
+      <div className="hidden max-w-full overflow-x-auto md:block">
+        <table className="w-full min-w-[720px] text-left text-xs">
+          <thead className="border-b border-[#e2e2de] bg-[#fafaf8] text-[11px] uppercase text-[#6a6a6a]">
+            <tr>
+              <th className="w-10 px-3 py-3.5 font-medium" aria-label="Expand row" />
+              <th className="px-4 py-3.5 font-medium">Reference</th>
+              <th className="px-4 py-3.5 font-medium">Date (WAT)</th>
+              <th className="px-4 py-3.5 font-medium">Customer</th>
+              <th className="px-4 py-3.5 font-medium">Items</th>
+              <th className="px-4 py-3.5 font-medium text-right">Total</th>
+              <th className="px-5 py-3.5 font-medium text-right">Status</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[#f0f0ec]">
+            {orders.length > 0 ? (
+              orders.map((order) => {
+                const isExpanded = Boolean(expandedIds[order.id])
+                return (
+                  <Fragment key={order.id}>
+                    <tr
+                      onClick={() => toggleRow(order.id)}
+                      className={`cursor-pointer transition-colors ${
+                        isExpanded ? 'bg-[#fafaf8]' : 'hover:bg-[#fafaf8]'
+                      }`}
+                    >
+                      <td className="px-3 py-3.5 text-center">
+                        <button
+                          type="button"
+                          aria-expanded={isExpanded}
+                          aria-label={`${isExpanded ? 'Collapse' : 'Expand'} order ${order.reference}`}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleRow(order.id)
+                          }}
+                          className="inline-flex h-6 w-6 items-center justify-center rounded text-[#6a6a6a] transition-colors hover:bg-[#ecece8] hover:text-[#030304]"
+                        >
+                          <ChevronRight
+                            className={`h-4 w-4 transition-transform duration-200 ${
+                              isExpanded ? 'rotate-90 text-[#030304]' : ''
+                            }`}
+                          />
+                        </button>
+                      </td>
+                      <td className="px-4 py-3.5 font-mono font-semibold whitespace-nowrap">
+                        <Link
+                          href={`/admin/orders/${order.id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="underline underline-offset-4 hover:text-[#ff5331]"
+                        >
+                          {order.reference}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3.5 text-[#4a4a4a] whitespace-nowrap">
+                        {formatLagosDate(order.createdAt)}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="font-medium text-[#030304]">
+                          {order.customerName || order.customerEmail}
+                        </div>
+                        <div className="text-[11px] text-[#757575]">{order.customerEmail}</div>
+                      </td>
+                      <td className="px-4 py-3.5 text-[#4a4a4a] whitespace-nowrap">
+                        {order.itemCount}
+                      </td>
+                      <td className="px-4 py-3.5 text-right font-semibold text-[#030304] whitespace-nowrap">
+                        {formatNaira(order.totalKobo)}
+                      </td>
+                      <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                        <StatusBadge status={order.status} />
                       </td>
                     </tr>
-                  ) : null}
-                </Fragment>
-              )
-            })
-          ) : (
-            <tr>
-              <td colSpan={7} className="px-5 py-10 text-center text-[#757575]">
-                No orders match your current filters.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+
+                    {isExpanded ? (
+                      <tr>
+                        <td colSpan={7} className="p-0">
+                          <ExpandedOrderDrawer order={order} />
+                        </td>
+                      </tr>
+                    ) : null}
+                  </Fragment>
+                )
+              })
+            ) : (
+              <tr>
+                <td colSpan={7} className="px-5 py-10 text-center text-[#757575]">
+                  No orders match your current filters.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

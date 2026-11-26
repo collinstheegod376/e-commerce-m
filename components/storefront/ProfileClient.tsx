@@ -161,20 +161,20 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
       </div>
 
       <div className="profile-grid">
-        <aside className="profile-card">
+        <aside className="profile-card min-w-0 max-w-full overflow-hidden">
           <div className="avatar">{initials || 'MK'}</div>
           <span>{profile.role === 'admin' ? 'Studio Admin' : 'Verified Member'}</span>
-          <h2>{name.trim() || 'Client Profile'}</h2>
-          <p>{profile.email}</p>
+          <h2 className="break-words">{name.trim() || 'Client Profile'}</h2>
+          <p className="break-all">{profile.email}</p>
 
           <div className="profile-summary-list">
-            <div>
+            <div className="min-w-0">
               <span>Primary Phone</span>
-              <strong>{phone.trim() || 'Not set'}</strong>
+              <strong className="break-words">{phone.trim() || 'Not set'}</strong>
             </div>
-            <div>
+            <div className="min-w-0">
               <span>Delivery Address</span>
-              <strong>
+              <strong className="break-words">
                 {[streetAddress.trim(), city.trim(), stateRegion.trim(), country.trim()]
                   .filter(Boolean)
                   .join(', ') || 'Not set'}
@@ -203,14 +203,14 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
           </div>
         </aside>
 
-        <div className="profile-content">
-          <section>
+        <div className="profile-content min-w-0 max-w-full">
+          <section className="min-w-0 max-w-full">
             <div className="section-heading">
-              <div>
-                <span>01</span>
-                <h2>Client details &amp; delivery address</h2>
+              <div className="min-w-0">
+                <span className="shrink-0">01</span>
+                <h2 className="min-w-0 break-words">Client details &amp; delivery address</h2>
               </div>
-              <span>{isCheckoutReady ? 'Ready' : 'Incomplete'}</span>
+              <span className="shrink-0">{isCheckoutReady ? 'Ready' : 'Incomplete'}</span>
             </div>
 
             <form className="client-form" onSubmit={handleSave}>
@@ -219,6 +219,7 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
                   <span>Full Name *</span>
                   <input
                     required
+                    className="min-w-0 text-base sm:text-[0.95rem]"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Tunde Adebayo"
@@ -228,6 +229,7 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
                 <label>
                   <span>Handle / Username</span>
                   <input
+                    className="min-w-0 text-base sm:text-[0.95rem]"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="@tunde"
@@ -239,6 +241,7 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
                   <input
                     required
                     type="tel"
+                    className="min-w-0 text-base sm:text-[0.95rem]"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+234 803 000 0000"
@@ -249,6 +252,7 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
                   <span>Secondary Phone</span>
                   <input
                     type="tel"
+                    className="min-w-0 text-base sm:text-[0.95rem]"
                     value={altPhone}
                     onChange={(e) => setAltPhone(e.target.value)}
                     placeholder="Optional backup number"
@@ -259,6 +263,7 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
                   <span>Street Address *</span>
                   <input
                     required
+                    className="min-w-0 text-base sm:text-[0.95rem]"
                     value={streetAddress}
                     onChange={(e) => setStreetAddress(e.target.value)}
                     placeholder="14 Admiralty Way, Lekki Phase 1"
@@ -269,6 +274,7 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
                   <span>City *</span>
                   <input
                     required
+                    className="min-w-0 text-base sm:text-[0.95rem]"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     placeholder="Lagos"
@@ -278,6 +284,7 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
                 <label>
                   <span>State</span>
                   <input
+                    className="min-w-0 text-base sm:text-[0.95rem]"
                     value={stateRegion}
                     onChange={(e) => setStateRegion(e.target.value)}
                     placeholder="Lagos State"
@@ -287,6 +294,7 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
                 <label>
                   <span>Postal Code</span>
                   <input
+                    className="min-w-0 text-base sm:text-[0.95rem]"
                     value={postalCode}
                     onChange={(e) => setPostalCode(e.target.value)}
                     placeholder="106104"
@@ -296,6 +304,7 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
                 <label>
                   <span>Country</span>
                   <input
+                    className="min-w-0 text-base sm:text-[0.95rem]"
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
                     placeholder="Nigeria"
@@ -305,6 +314,7 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
                 <label className="span-2">
                   <span>Delivery Notes</span>
                   <input
+                    className="min-w-0 text-base sm:text-[0.95rem]"
                     value={deliveryNotes}
                     onChange={(e) => setDeliveryNotes(e.target.value)}
                     placeholder="Estate gate code, landmark, or drop-off note"
@@ -313,17 +323,21 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
               </div>
 
               {error ? (
-                <p role="alert" className="mt-4 text-xs text-[#ff5331]">
+                <p role="alert" className="mt-4 break-words text-xs text-[#ff5331]">
                   {error}
                 </p>
               ) : null}
 
               <div className="client-form-footer">
-                <button className="primary-action disabled:opacity-50" type="submit" disabled={saving}>
+                <button
+                  className="primary-action w-full disabled:opacity-50 sm:w-auto"
+                  type="submit"
+                  disabled={saving}
+                >
                   {saving ? 'Saving…' : 'Save client details'}
                 </button>
                 {notice ? (
-                  <p className="client-form-notice" role="status">
+                  <p className="client-form-notice break-words" role="status">
                     {notice}
                   </p>
                 ) : null}
@@ -331,17 +345,17 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
             </form>
           </section>
 
-          <section>
+          <section className="min-w-0 max-w-full">
             <div className="section-heading">
-              <div>
-                <span>02</span>
-                <h2>Order history</h2>
+              <div className="min-w-0">
+                <span className="shrink-0">02</span>
+                <h2 className="min-w-0 break-words">Order history</h2>
               </div>
-              <span>{orders.length} total</span>
+              <span className="shrink-0">{orders.length} total</span>
             </div>
 
             {orders.length > 0 ? (
-              <div className="mt-5 space-y-3.5">
+              <div className="mt-5 min-w-0 max-w-full space-y-3.5">
                 {orders.map((order) => {
                   const isExpanded = expandedOrderId === order.id
                   const statusLabel = getStatusLabel(order.status)
@@ -349,7 +363,7 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
                   return (
                     <div
                       key={order.id}
-                      className={`overflow-hidden rounded-xl border transition-colors duration-200 ${
+                      className={`w-full min-w-0 max-w-full overflow-hidden rounded-xl border transition-colors duration-200 ${
                         isExpanded
                           ? 'border-[#ff660c]/45 bg-[#041b26]'
                           : 'border-white/12 bg-[#041b26]/70 hover:border-white/25'
@@ -362,22 +376,22 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
                         onClick={() =>
                           setExpandedOrderId((prev) => (prev === order.id ? null : order.id))
                         }
-                        className="flex w-full flex-col gap-3 p-4 text-left transition-colors sm:flex-row sm:items-center sm:justify-between sm:p-5"
+                        className="flex w-full min-w-0 max-w-full flex-col gap-3 overflow-hidden p-4 text-left transition-colors sm:flex-row sm:items-center sm:justify-between sm:p-5"
                       >
-                        <div className="min-w-0 flex-1 space-y-1">
-                          <div className="flex flex-wrap items-center gap-2.5">
-                            <span className="font-mono text-sm font-bold text-[#f8fafc]">
+                        <div className="w-full min-w-0 flex-1 space-y-1.5">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="break-all font-mono text-xs font-bold text-[#f8fafc] sm:text-sm">
                               {order.reference}
                             </span>
                             <span
-                              className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] ${getStatusPillStyle(
+                              className={`inline-flex max-w-full items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${getStatusPillStyle(
                                 order.status,
                               )}`}
                             >
                               {statusLabel}
                             </span>
                           </div>
-                          <p className="truncate text-xs text-slate-300">
+                          <p className="line-clamp-2 break-words text-xs leading-relaxed text-slate-300">
                             {order.itemsSummary || 'Maison Kriss Order'}
                           </p>
                           <p className="text-[11px] text-slate-400">
@@ -385,8 +399,8 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
                           </p>
                         </div>
 
-                        <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-3 sm:border-t-0 sm:pt-0">
-                          <div className="text-left sm:text-right">
+                        <div className="flex w-full items-center justify-between gap-3 border-t border-white/10 pt-3 sm:w-auto sm:shrink-0 sm:justify-end sm:gap-4 sm:border-t-0 sm:pt-0">
+                          <div className="min-w-0 text-left sm:text-right">
                             <p className="text-sm font-bold text-[#ff660c]">
                               {formatNaira(order.totalKobo)}
                             </p>
@@ -420,8 +434,8 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
                             : 'grid-rows-[0fr] opacity-0'
                         }`}
                       >
-                        <div className="overflow-hidden">
-                          <div className="space-y-5 border-t border-white/10 bg-[#01121a]/60 p-4 sm:p-6">
+                        <div className="min-w-0 overflow-hidden">
+                          <div className="min-w-0 space-y-4 border-t border-white/10 bg-[#01121a]/60 p-3.5 sm:space-y-5 sm:p-6">
                             {/* Live Order Delivery Status Stepper */}
                             <OrderTrackingStepper
                               status={order.status}
@@ -431,10 +445,10 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
                             />
 
                             {/* Itemized Breakdown & Delivery Details */}
-                            <div className="rounded-xl border border-white/10 bg-[#041b26]/70 p-4 sm:p-5">
-                              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                            <div className="min-w-0 max-w-full overflow-hidden rounded-xl border border-white/10 bg-[#041b26]/70 p-3.5 sm:p-5">
+                              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
                                 <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#ff660c]">
-                                  <Package className="h-3.5 w-3.5" aria-hidden="true" />
+                                  <Package className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                                   Items Breakdown
                                 </span>
                                 <span className="text-xs text-slate-400">
@@ -446,10 +460,10 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
                                 {order.items.map((item) => (
                                   <div
                                     key={item.id}
-                                    className="flex items-center justify-between gap-3 py-2.5 text-xs sm:text-sm"
+                                    className="flex min-w-0 items-start justify-between gap-3 py-2.5 text-xs sm:items-center sm:text-sm"
                                   >
-                                    <div>
-                                      <p className="font-semibold text-[#f8fafc]">
+                                    <div className="min-w-0 flex-1">
+                                      <p className="break-words font-semibold text-[#f8fafc]">
                                         {item.productNameSnap}
                                       </p>
                                       <p className="text-[11px] uppercase tracking-[0.1em] text-slate-400">
@@ -464,40 +478,42 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
                               </div>
 
                               <div className="mt-3 space-y-1.5 border-t border-white/10 pt-3 text-xs">
-                                <div className="flex justify-between text-slate-400">
+                                <div className="flex justify-between gap-3 text-slate-400">
                                   <span>Subtotal</span>
-                                  <span>{formatNaira(order.subtotalKobo)}</span>
+                                  <span className="shrink-0">{formatNaira(order.subtotalKobo)}</span>
                                 </div>
-                                <div className="flex justify-between text-slate-400">
+                                <div className="flex justify-between gap-3 text-slate-400">
                                   <span>Shipping</span>
-                                  <span>
+                                  <span className="shrink-0">
                                     {order.shippingKobo === 0
                                       ? 'Complimentary'
                                       : formatNaira(order.shippingKobo)}
                                   </span>
                                 </div>
-                                <div className="flex justify-between pt-1 text-sm font-bold text-[#f8fafc]">
+                                <div className="flex justify-between gap-3 pt-1 text-sm font-bold text-[#f8fafc]">
                                   <span>Total</span>
-                                  <span className="text-[#ff660c]">
+                                  <span className="shrink-0 text-[#ff660c]">
                                     {formatNaira(order.totalKobo)}
                                   </span>
                                 </div>
                               </div>
 
-                              <div className="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                                <p className="flex items-start gap-1.5 text-xs text-slate-400">
+                              <div className="mt-4 flex min-w-0 flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                                <p className="flex min-w-0 items-start gap-1.5 text-xs text-slate-400">
                                   <MapPin
                                     className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#ff660c]"
                                     aria-hidden="true"
                                   />
-                                  <span>{order.shippingAddressText}</span>
+                                  <span className="min-w-0 break-words">
+                                    {order.shippingAddressText}
+                                  </span>
                                 </p>
                                 <Link
                                   href={`/orders/${encodeURIComponent(order.reference)}/confirmation`}
                                   className="inline-flex shrink-0 items-center gap-1.5 self-start border-b border-[#ff660c] pb-0.5 text-xs font-semibold uppercase tracking-[0.14em] text-[#ff660c] transition-colors hover:border-white hover:text-white sm:self-auto"
                                 >
                                   <span>View Confirmation Receipt</span>
-                                  <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                                  <ArrowUpRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                                 </Link>
                               </div>
                             </div>

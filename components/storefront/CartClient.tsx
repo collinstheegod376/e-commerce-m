@@ -131,7 +131,7 @@ export function CartClient({ initialCart, profileSummary }: CartClientProps) {
       {error ? (
         <div
           role="alert"
-          className="mt-6 rounded-lg border-l-4 border-[#ff660c] bg-[#ff660c]/10 px-4 py-3 text-sm text-[#f8fafc]"
+          className="mt-6 break-words rounded-lg border-l-4 border-[#ff660c] bg-[#ff660c]/10 px-4 py-3 text-sm text-[#f8fafc]"
         >
           {error}
         </div>
@@ -140,7 +140,7 @@ export function CartClient({ initialCart, profileSummary }: CartClientProps) {
       {notice ? (
         <div
           role="status"
-          className="mt-6 rounded-lg border-l-4 border-emerald-500 bg-emerald-500/10 px-4 py-3 text-sm text-[#f8fafc]"
+          className="mt-6 break-words rounded-lg border-l-4 border-emerald-500 bg-emerald-500/10 px-4 py-3 text-sm text-[#f8fafc]"
         >
           {notice}
         </div>
@@ -148,7 +148,7 @@ export function CartClient({ initialCart, profileSummary }: CartClientProps) {
 
       {cart.items.length > 0 ? (
         <div className="cart-layout">
-          <div className="cart-list">
+          <div className="cart-list min-w-0">
             {cart.items.map((item, idx) => (
               <CartLine
                 key={item.id}
@@ -161,46 +161,46 @@ export function CartClient({ initialCart, profileSummary }: CartClientProps) {
             ))}
           </div>
 
-          <aside className="order-summary">
+          <aside className="order-summary w-full min-w-0 !p-5 sm:!p-8">
             <p>Order summary</p>
-            <div>
+            <div className="gap-3">
               <span>Subtotal</span>
-              <strong>{formatNaira(cart.subtotalKobo)}</strong>
+              <strong className="text-right">{formatNaira(cart.subtotalKobo)}</strong>
             </div>
-            <div>
+            <div className="gap-3">
               <span>Shipping</span>
-              <strong>Calculated at checkout</strong>
+              <strong className="text-right">Calculated at checkout</strong>
             </div>
-            <div className="summary-total">
+            <div className="summary-total gap-3">
               <span>Estimated Subtotal</span>
-              <strong>{formatNaira(cart.subtotalKobo)}</strong>
+              <strong className="text-right whitespace-nowrap">{formatNaira(cart.subtotalKobo)}</strong>
             </div>
 
-            <div className="checkout-client-box">
-              <div className="checkout-client-header">
+            <div className="checkout-client-box min-w-0">
+              <div className="checkout-client-header flex-wrap gap-2">
                 <span>Deliver to</span>
                 <Link
                   href="/profile"
-                  className="border-b border-[#ff660c] pb-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#ff660c] hover:text-white"
+                  className="inline-flex min-h-[32px] items-center border-b border-[#ff660c] pb-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#ff660c] hover:text-white"
                 >
                   {hasDeliveryInfo ? 'Edit profile' : 'Add details'}
                 </Link>
               </div>
               {hasDeliveryInfo ? (
-                <div className="checkout-client-details">
+                <div className="checkout-client-details min-w-0 break-words [overflow-wrap:anywhere]">
                   <strong>{profileSummary.name || profileSummary.email}</strong>
                   <span>{profileSummary.phone}</span>
                   <span>{addressText}</span>
                 </div>
               ) : (
                 <div className="space-y-2.5">
-                  <p className="checkout-client-missing">
+                  <p className="checkout-client-missing break-words">
                     Delivery location is required before checkout. Missing:{' '}
                     <strong className="text-white">{missingDeliveryFields.join(', ')}</strong>.
                   </p>
                   <Link
                     href="/profile"
-                    className="inline-flex w-full items-center justify-center rounded border border-[#ff660c] bg-[#ff660c]/15 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#ff660c] transition-colors hover:bg-[#ff660c] hover:text-[#01121a]"
+                    className="inline-flex min-h-[44px] w-full items-center justify-center rounded border border-[#ff660c] bg-[#ff660c]/15 px-3 py-2.5 text-center text-[11px] font-bold uppercase tracking-[0.14em] text-[#ff660c] transition-colors hover:bg-[#ff660c] hover:text-[#01121a]"
                   >
                     Fill Delivery Details in Profile →
                   </Link>
@@ -212,7 +212,7 @@ export function CartClient({ initialCart, profileSummary }: CartClientProps) {
               type="button"
               disabled={checkoutBusy || !hasDeliveryInfo}
               onClick={handleCheckout}
-              className="disabled:cursor-not-allowed disabled:opacity-45"
+              className="min-h-[48px] disabled:cursor-not-allowed disabled:opacity-45"
             >
               {checkoutBusy
                 ? 'Initializing Paystack…'

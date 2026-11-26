@@ -1,11 +1,10 @@
 /**
- * Maps Maison Kriss product slugs to interactive 3D .glb assets & editorial metadata
+ * Maps Maison Kriss product slugs to editorial metadata
  * preserved from the Maison Kriss storefront design.
  */
 
 export interface ProductEditorialMeta {
   eyebrow: string
-  modelUrl?: string
   features: string[]
   badge?: string
 }
