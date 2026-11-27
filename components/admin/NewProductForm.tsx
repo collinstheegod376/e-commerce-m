@@ -1,7 +1,8 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { FormEvent, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
 import {
   MIN_PRODUCT_IMAGES,
   ProductImageUploader,
@@ -40,6 +41,8 @@ export function NewProductForm() {
   ])
 
   const [submitting, setSubmitting] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const isLoading = submitting || isPending
   const [error, setError] = useState('')
 
   function handleNameChange(value: string) {
@@ -81,6 +84,7 @@ export function NewProductForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (isLoading) return
     setError('')
 
     const parsedNaira = Number(priceNaira)
@@ -124,8 +128,10 @@ export function NewProductForm() {
         setSubmitting(false)
         return
       }
-      router.push(`/admin/products/${data.product?.id ?? ''}`)
-      router.refresh()
+      startTransition(() => {
+        router.push(`/admin/products/${data.product?.id ?? ''}`)
+        router.refresh()
+      })
     } catch {
       setError('Network error while creating product.')
       setSubmitting(false)
@@ -331,10 +337,18 @@ export function NewProductForm() {
       <div className="flex items-center gap-3">
         <button
           type="submit"
-          disabled={submitting}
-          className="bg-[#030304] px-6 py-3 text-xs font-medium uppercase tracking-[0.06em] text-white hover:bg-[#1f1f22] disabled:opacity-50"
+          disabled={isLoading}
+          aria-busy={isLoading}
+          className="inline-flex items-center gap-2 bg-[#030304] px-6 py-3 text-xs font-medium uppercase tracking-[0.06em] text-white hover:bg-[#1f1f22] active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {submitting ? 'Creating Product…' : 'Create Product'}
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin text-white" aria-hidden="true" />
+              <span>Creating Product…</span>
+            </>
+          ) : (
+            'Create Product'
+          )}
         </button>
       </div>
     </form>

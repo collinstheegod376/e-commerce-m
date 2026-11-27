@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
 
 interface UserRoleToggleProps {
   userId: string
@@ -19,13 +20,15 @@ export function UserRoleToggle({
   const router = useRouter()
   const [role, setRole] = useState(currentRole)
   const [busy, setBusy] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const isLoading = busy || isPending
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
 
   const nextRole = role === 'admin' ? 'customer' : 'admin'
 
   async function handleToggle() {
-    if (isSelf) return
+    if (isSelf || isLoading) return
     setBusy(true)
     setError('')
     setNotice('')
@@ -39,11 +42,14 @@ export function UserRoleToggle({
       const data = (await res.json()) as { error?: string; profile?: { role: string } }
       if (!res.ok) {
         setError(data.error || 'Could not update role.')
+        setBusy(false)
         return
       }
       setRole(data.profile?.role ?? nextRole)
       setNotice(`Updated ${userEmail} to ${nextRole}.`)
-      router.refresh()
+      startTransition(() => {
+        router.refresh()
+      })
     } catch {
       setError('Network error while updating role.')
     } finally {
@@ -63,15 +69,21 @@ export function UserRoleToggle({
 
         <button
           type="button"
-          disabled={isSelf || busy}
+          disabled={isSelf || isLoading}
           onClick={handleToggle}
-          className="border border-[#030304] bg-[#030304] px-4 py-2 text-xs font-medium uppercase tracking-[0.06em] text-white hover:bg-[#1f1f22] disabled:cursor-not-allowed disabled:opacity-40"
+          aria-busy={isLoading}
+          className="inline-flex items-center gap-1.5 border border-[#030304] bg-[#030304] px-4 py-2 text-xs font-medium uppercase tracking-[0.06em] text-white transition-all active:scale-95 hover:bg-[#1f1f22] disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {busy
-            ? 'Updating…'
-            : role === 'admin'
-              ? 'Demote to Customer'
-              : 'Promote to Admin'}
+          {isLoading ? (
+            <>
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-white" aria-hidden="true" />
+              <span>Updating…</span>
+            </>
+          ) : role === 'admin' ? (
+            'Demote to Customer'
+          ) : (
+            'Promote to Admin'
+          )}
         </button>
       </div>
 

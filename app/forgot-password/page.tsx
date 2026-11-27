@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from 'react'
 import Link from 'next/link'
+import { Loader2 } from 'lucide-react'
 import { AuthEditorialShell } from '@/components/auth/AuthEditorialShell'
 
 const NEUTRAL_MESSAGE =
@@ -77,11 +78,19 @@ export default function ForgotPasswordPage() {
             </label>
 
             <button
-              className="primary-action disabled:opacity-50"
+              className="primary-action flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:opacity-60 disabled:cursor-not-allowed"
               type="submit"
               disabled={submitting}
+              aria-busy={submitting}
             >
-              {submitting ? 'Sending link…' : 'Send reset link'}
+              {submitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-[#01121a]" aria-hidden="true" />
+                  <span>Sending link…</span>
+                </>
+              ) : (
+                'Send reset link'
+              )}
             </button>
           </>
         )}

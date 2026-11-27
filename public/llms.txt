@@ -1,0 +1,28 @@
+# Maison Kriss
+
+> Note: This /llms.txt file is an AI-agent discovery aid only. It is NOT a Google Search ranking signal.
+
+Maison Kriss is an independent Nigerian contemporary clothing and object studio based in Lagos, Nigeria. Every garment is engineered as an everyday uniform using heavyweight natural fabrics, architectural proportions, and functional hardware produced in small numbered runs.
+
+The storefront operates with private members-only access for shopping, cart, checkout, and order tracking. Public editorial and client service information is available at the canonical pages below.
+
+## Public Pages
+
+- [Our Story](https://www.maisonkriss.shop/story): Brand background, design philosophy, Lagos studio craft, and archive garment highlights.
+- [Contact & Client Services](https://www.maisonkriss.shop/contact): Studio hours, dispatch & delivery timelines, returns/exchanges policy, and verified client concierge channels.
+- [Extended Studio Reference](https://www.maisonkriss.shop/llms-full.txt): Full plain-text reference of Maison Kriss public studio details for AI assistants.
+
+## Studio Operations
+
+- **Location:** Lagos, Nigeria
+- **Access Model:** Private members-only storefront (member sign-in required for catalog browsing, cart, checkout, and order management)
+- **Studio Hours:** Monday–Friday 9:00 AM – 6:00 PM WAT (Africa/Lagos); Saturday 11:00 AM – 4:00 PM WAT; Sunday Closed
+- **Dispatch & Delivery:** Same-day or next business day courier dispatch in Lagos Metro after payment confirmation; 2–4 business days nationwide across Nigeria via tracked express courier
+- **Returns & Exchanges:** Unworn garments with original tags may be exchanged within 7 days of delivery
+
+## Contact
+
+- **Website:** https://www.maisonkriss.shop
+- **Client Services:** https://www.maisonkriss.shop/contact
+- **Email:** support@maisonkriss.shop
+- **TODO:** Add official social media handles and studio address if desired for public AI discovery.

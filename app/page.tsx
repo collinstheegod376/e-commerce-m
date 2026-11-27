@@ -1,10 +1,21 @@
+import type { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
 import { requireUser } from '@/lib/auth'
 import { getCartResponse } from '@/lib/cart'
+import { canonicalUrl } from '@/lib/seo'
 import { StorefrontHeader } from '@/components/storefront/StorefrontHeader'
 import { HeroShowcase } from '@/components/storefront/HeroShowcase'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Maison Kriss — Lagos Contemporary Clothing',
+  description:
+    'Members-only Nigerian contemporary design & streetwear studio. Heavyweight garments, editorial craft, and numbered releases.',
+  alternates: {
+    canonical: canonicalUrl('/'),
+  },
+}
 
 export default async function HomePage() {
   const user = await requireUser('/')

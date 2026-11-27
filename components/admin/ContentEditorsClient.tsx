@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from 'react'
 import Link from 'next/link'
+import { Loader2 } from 'lucide-react'
 import { MarkdownContent } from '@/components/storefront/MarkdownContent'
 
 interface PageRecord {
@@ -118,9 +119,17 @@ function SinglePageEditor({ initial }: { initial: PageRecord }) {
       <button
         type="submit"
         disabled={saving}
-        className="bg-[#030304] px-5 py-2.5 text-xs font-medium uppercase tracking-[0.06em] text-white hover:bg-[#1f1f22] disabled:opacity-50"
+        aria-busy={saving}
+        className="inline-flex items-center gap-2 bg-[#030304] px-5 py-2.5 text-xs font-medium uppercase tracking-[0.06em] text-white hover:bg-[#1f1f22] active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {saving ? 'Saving…' : `Save /${initial.slug}`}
+        {saving ? (
+          <>
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-white" aria-hidden="true" />
+            <span>Saving…</span>
+          </>
+        ) : (
+          `Save /${initial.slug}`
+        )}
       </button>
     </form>
   )

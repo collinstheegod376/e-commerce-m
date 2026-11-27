@@ -1,9 +1,9 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { FormEvent, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowUpRight, ChevronDown, MapPin, Package } from 'lucide-react'
+import { ArrowUpRight, ChevronDown, Loader2, MapPin, Package } from 'lucide-react'
 import { formatLagosDate, formatNaira } from '@/lib/money'
 import { type OrderTrackingTimestamps, getStatusLabel } from '@/lib/order-status'
 import { OrderTrackingStepper } from '@/components/storefront/OrderTrackingStepper'
@@ -91,7 +91,13 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
   const [deliveryNotes, setDeliveryNotes] = useState(addr.deliveryNotes ?? '')
 
   const [saving, setSaving] = useState(false)
-  const [signingOut, setSigningOut] = useState(false)
+  const [savePending, startSaveTransition] = useTransition()
+  const isSaving = saving || savePending
+
+  const [isSigningOut, setIsSigningOut] = useState(false)
+  const [signOutPending, startSignOutTransition] = useTransition()
+  const signingOut = isSigningOut || signOutPending
+
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null)
@@ -106,6 +112,7 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
 
   async function handleSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (isSaving) return
     setSaving(true)
     setNotice('')
     setError('')
@@ -132,10 +139,13 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
       const data = (await res.json()) as { error?: string }
       if (!res.ok) {
         setError(data.error || 'Could not save profile.')
+        setSaving(false)
         return
       }
       setNotice('Client details saved to your account.')
-      router.refresh()
+      startSaveTransition(() => {
+        router.refresh()
+      })
     } catch {
       setError('Network error while saving profile.')
     } finally {
@@ -144,10 +154,17 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
   }
 
   async function handleSignOut() {
-    setSigningOut(true)
-    await fetch('/api/auth/signout', { method: 'POST' })
-    router.push('/login')
-    router.refresh()
+    if (signingOut) return
+    setIsSigningOut(true)
+    try {
+      await fetch('/api/auth/signout', { method: 'POST' })
+      startSignOutTransition(() => {
+        router.push('/login')
+        router.refresh()
+      })
+    } catch {
+      setIsSigningOut(false)
+    }
   }
 
   return (
@@ -197,8 +214,15 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
             >
               View Cart
             </Link>
-            <button type="button" disabled={signingOut} onClick={handleSignOut}>
-              {signingOut ? 'Signing out…' : 'Sign out'}
+            <button
+              type="button"
+              disabled={signingOut}
+              onClick={handleSignOut}
+              aria-busy={signingOut}
+              className="flex items-center justify-center gap-1.5 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {signingOut ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : null}
+              <span>{signingOut ? 'Signing out…' : 'Sign out'}</span>
             </button>
           </div>
         </aside>
@@ -330,11 +354,19 @@ export function ProfileClient({ profile, orders }: ProfileClientProps) {
 
               <div className="client-form-footer">
                 <button
-                  className="primary-action w-full disabled:opacity-50 sm:w-auto"
+                  className="primary-action flex items-center justify-center gap-2 w-full active:scale-[0.99] transition-transform disabled:opacity-60 disabled:cursor-not-allowed sm:w-auto"
                   type="submit"
-                  disabled={saving}
+                  disabled={isSaving}
+                  aria-busy={isSaving}
                 >
-                  {saving ? 'Saving…' : 'Save client details'}
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin text-[#01121a]" aria-hidden="true" />
+                      <span>Saving…</span>
+                    </>
+                  ) : (
+                    'Save client details'
+                  )}
                 </button>
                 {notice ? (
                   <p className="client-form-notice break-words" role="status">

@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, CheckCircle2, Mail } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Loader2, Mail } from 'lucide-react'
 import { getStatusLabel } from '@/lib/order-status'
 
 interface OrderDetailActionsProps {
@@ -78,6 +78,8 @@ export function OrderDetailActions({
   const [estimatedDelivery, setEstimatedDelivery] = useState(currentEstimatedDelivery ?? '')
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const isLoading = busy || isPending
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
 
@@ -88,7 +90,7 @@ export function OrderDetailActions({
   }
 
   async function executeAction() {
-    if (!confirmAction) return
+    if (!confirmAction || isLoading) return
     setBusy(true)
     setError('')
 
@@ -118,7 +120,9 @@ export function OrderDetailActions({
           ? `Status updated to ${label} · Customer email sent`
           : `Status updated to ${label}`,
       )
-      router.refresh()
+      startTransition(() => {
+        router.refresh()
+      })
     } catch {
       setError('Network error while updating order.')
     } finally {
@@ -257,19 +261,27 @@ export function OrderDetailActions({
             <div className="mt-6 flex items-center justify-end gap-3">
               <button
                 type="button"
-                disabled={busy}
+                disabled={isLoading}
                 onClick={() => setConfirmAction(null)}
-                className="border border-[#d6d6d6] px-4 py-2 text-xs text-[#4a4a4a] hover:border-[#030304]"
+                className="border border-[#d6d6d6] px-4 py-2 text-xs text-[#4a4a4a] hover:border-[#030304] transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 type="button"
-                disabled={busy}
+                disabled={isLoading}
                 onClick={executeAction}
-                className="bg-[#030304] px-4 py-2 text-xs font-medium uppercase tracking-[0.06em] text-white hover:bg-[#1f1f22] disabled:opacity-50"
+                aria-busy={isLoading}
+                className="inline-flex items-center gap-1.5 bg-[#030304] px-4 py-2 text-xs font-medium uppercase tracking-[0.06em] text-white hover:bg-[#1f1f22] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {busy ? 'Processing…' : `Confirm ${getStatusLabel(confirmAction)}`}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                    <span>Processing…</span>
+                  </>
+                ) : (
+                  `Confirm ${getStatusLabel(confirmAction)}`
+                )}
               </button>
             </div>
           </div>

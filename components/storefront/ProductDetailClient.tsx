@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import {
   ChevronLeft,
@@ -104,9 +105,13 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                 aria-label={`Inspect ${product.name} (${currentLabel}) in full screen`}
                 className="flex h-full w-full cursor-zoom-in items-center justify-center"
               >
-                <img
+                <Image
                   src={currentImage}
                   alt={`${product.name} — ${currentLabel}`}
+                  width={900}
+                  height={900}
+                  priority
+                  sizes="(max-width: 1024px) 95vw, 56vw"
                   className="max-h-full w-full object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-[1.03]"
                 />
               </button>
@@ -189,9 +194,12 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                     }`}
                   >
                     <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-lg bg-slate-100 p-1">
-                      <img
+                      <Image
                         src={imgUrl}
                         alt={`${product.name} ${thumbLabel}`}
+                        width={128}
+                        height={128}
+                        sizes="64px"
                         className="h-full w-full object-contain mix-blend-multiply"
                       />
                     </div>

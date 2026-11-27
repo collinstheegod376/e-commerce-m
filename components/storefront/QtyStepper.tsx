@@ -27,7 +27,7 @@ export function QtyStepper({
         disabled={!canDecrease}
         onClick={() => onChange(value - 1)}
         aria-label={`Decrease quantity of ${itemLabel}`}
-        className="transition-colors disabled:cursor-not-allowed disabled:opacity-35"
+        className="transition-all active:scale-90 disabled:cursor-not-allowed disabled:opacity-35"
       >
         −
       </button>
@@ -37,7 +37,7 @@ export function QtyStepper({
         disabled={!canIncrease}
         onClick={() => onChange(value + 1)}
         aria-label={`Increase quantity of ${itemLabel}`}
-        className="transition-colors disabled:cursor-not-allowed disabled:opacity-35"
+        className="transition-all active:scale-90 disabled:cursor-not-allowed disabled:opacity-35"
       >
         +
       </button>

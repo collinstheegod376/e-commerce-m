@@ -1,13 +1,29 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { requireUser } from '@/lib/auth'
 import { getCartResponse } from '@/lib/cart'
 import { formatShippingAddress } from '@/lib/money'
 import { extractOrderTrackingMeta } from '@/lib/order-status'
+import { canonicalUrl, NOINDEX_ROBOTS } from '@/lib/seo'
 import { StorefrontHeader } from '@/components/storefront/StorefrontHeader'
 import { OrderConfirmationClient } from '@/components/storefront/OrderConfirmationClient'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ reference: string }>
+}): Promise<Metadata> {
+  const { reference } = await params
+  return {
+    title: `Order Confirmation ${reference} — Maison Kriss`,
+    description: 'Private Maison Kriss order payment and dispatch confirmation.',
+    alternates: { canonical: canonicalUrl(`/orders/${reference}/confirmation`) },
+    robots: NOINDEX_ROBOTS,
+  }
+}
 
 export default async function OrderConfirmationPage({
   params,

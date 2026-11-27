@@ -9,6 +9,7 @@ interface StorefrontHeaderProps {
   initialCartCount: number
   isAdmin: boolean
   userName?: string | null
+  isAuthenticated?: boolean
 }
 
 function MkMonogramBadge() {
@@ -46,6 +47,7 @@ export function StorefrontHeader({
   initialCartCount,
   isAdmin,
   userName,
+  isAuthenticated = true,
 }: StorefrontHeaderProps) {
   const pathname = usePathname()
   const [cartCount, setCartCount] = useState(initialCartCount)
@@ -103,11 +105,15 @@ export function StorefrontHeader({
   const firstName = userName?.trim().split(/\s+/)[0] || null
 
   const navItems = [
-    {
-      label: 'Products',
-      href: '/',
-      active: pathname === '/' || pathname.startsWith('/products'),
-    },
+    ...(isAuthenticated
+      ? [
+          {
+            label: 'Products',
+            href: '/',
+            active: pathname === '/' || pathname.startsWith('/products'),
+          },
+        ]
+      : []),
     {
       label: 'Story',
       href: '/story',
@@ -118,11 +124,21 @@ export function StorefrontHeader({
       href: '/contact',
       active: pathname === '/contact',
     },
-    {
-      label: 'Account',
-      href: '/profile',
-      active: pathname === '/profile',
-    },
+    ...(isAuthenticated
+      ? [
+          {
+            label: 'Account',
+            href: '/profile',
+            active: pathname === '/profile',
+          },
+        ]
+      : [
+          {
+            label: 'Sign In',
+            href: '/login',
+            active: pathname === '/login',
+          },
+        ]),
     ...(isAdmin
       ? [
           {
@@ -136,12 +152,16 @@ export function StorefrontHeader({
   ]
 
   const mobileNavItems = [
-    ...navItems.slice(0, 4),
-    {
-      label: 'Cart',
-      href: '/cart',
-      active: pathname === '/cart',
-    },
+    ...navItems.filter((item) => !('isAdminLink' in item && item.isAdminLink)),
+    ...(isAuthenticated
+      ? [
+          {
+            label: 'Cart',
+            href: '/cart',
+            active: pathname === '/cart',
+          },
+        ]
+      : []),
     ...(isAdmin
       ? [
           {
@@ -160,7 +180,7 @@ export function StorefrontHeader({
         <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-8 sm:py-4 lg:px-12">
           {/* Left — Brand Wordmark + Geometric MK Monogram */}
           <Link
-            href="/"
+            href={isAuthenticated ? '/' : '/story'}
             onClick={() => setMobileMenuOpen(false)}
             className="group inline-flex min-w-0 shrink items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff660c] focus-visible:ring-offset-2 focus-visible:ring-offset-[#01121a] sm:gap-3"
           >
@@ -195,41 +215,53 @@ export function StorefrontHeader({
 
           {/* Right — Actions + Mobile Hamburger Trigger */}
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-3.5">
-            <Link
-              href="/cart"
-              onClick={() => setMobileMenuOpen(false)}
-              aria-label={`Cart with ${cartCount} items`}
-              className={`group relative inline-flex h-9 w-9 items-center justify-center border transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ff660c] hover:text-[#ff660c] hover:shadow-[0_0_20px_rgba(255,102,12,0.28)] sm:h-10 sm:w-10 ${
-                pathname === '/cart'
-                  ? 'border-[#ff660c] bg-[#ff660c]/15 text-[#ff660c]'
-                  : 'border-white/15 bg-[#041b26] text-[#f8fafc]'
-              }`}
-            >
-              <ShoppingBag className="h-[17px] w-[17px] transition-transform duration-200 group-hover:scale-105 sm:h-[18px] sm:w-[18px]" />
-              {cartCount > 0 ? (
-                <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#ff660c] px-1 text-[10px] font-bold leading-none text-[#01121a] shadow-sm sm:-right-1.5 sm:-top-1.5 sm:h-5 sm:min-w-[20px]">
-                  {cartCount}
-                </span>
-              ) : null}
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <Link
+                  href="/cart"
+                  onClick={() => setMobileMenuOpen(false)}
+                  aria-label={`Cart with ${cartCount} items`}
+                  className={`group relative inline-flex h-9 w-9 items-center justify-center border transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ff660c] hover:text-[#ff660c] hover:shadow-[0_0_20px_rgba(255,102,12,0.28)] sm:h-10 sm:w-10 ${
+                    pathname === '/cart'
+                      ? 'border-[#ff660c] bg-[#ff660c]/15 text-[#ff660c]'
+                      : 'border-white/15 bg-[#041b26] text-[#f8fafc]'
+                  }`}
+                >
+                  <ShoppingBag className="h-[17px] w-[17px] transition-transform duration-200 group-hover:scale-105 sm:h-[18px] sm:w-[18px]" />
+                  {cartCount > 0 ? (
+                    <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#ff660c] px-1 text-[10px] font-bold leading-none text-[#01121a] shadow-sm sm:-right-1.5 sm:-top-1.5 sm:h-5 sm:min-w-[20px]">
+                      {cartCount}
+                    </span>
+                  ) : null}
+                </Link>
 
-            <Link
-              href="/profile"
-              onClick={() => setMobileMenuOpen(false)}
-              aria-label={firstName ? `Profile (${firstName})` : 'Profile'}
-              className={`inline-flex h-9 w-9 items-center justify-center gap-2 border transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ff660c] hover:text-[#ff660c] sm:h-10 sm:w-auto sm:px-3 ${
-                pathname === '/profile'
-                  ? 'border-[#ff660c] bg-[#ff660c]/15 text-[#ff660c]'
-                  : 'border-white/15 bg-[#041b26] text-[#f8fafc]'
-              }`}
-            >
-              <User className="h-[17px] w-[17px] shrink-0 sm:h-[18px] sm:w-[18px]" />
-              {firstName ? (
-                <span className="hidden max-w-[110px] truncate text-xs font-medium uppercase tracking-[0.14em] lg:inline">
-                  {firstName}
-                </span>
-              ) : null}
-            </Link>
+                <Link
+                  href="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  aria-label={firstName ? `Profile (${firstName})` : 'Profile'}
+                  className={`inline-flex h-9 w-9 items-center justify-center gap-2 border transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ff660c] hover:text-[#ff660c] sm:h-10 sm:w-auto sm:px-3 ${
+                    pathname === '/profile'
+                      ? 'border-[#ff660c] bg-[#ff660c]/15 text-[#ff660c]'
+                      : 'border-white/15 bg-[#041b26] text-[#f8fafc]'
+                  }`}
+                >
+                  <User className="h-[17px] w-[17px] shrink-0 sm:h-[18px] sm:w-[18px]" />
+                  {firstName ? (
+                    <span className="hidden max-w-[110px] truncate text-xs font-medium uppercase tracking-[0.14em] lg:inline">
+                      {firstName}
+                    </span>
+                  ) : null}
+                </Link>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="inline-flex h-9 items-center justify-center border border-[#ff660c]/60 bg-[#ff660c]/15 px-3 text-[11px] font-bold uppercase tracking-[0.15em] text-[#ff660c] transition-all duration-200 hover:bg-[#ff660c] hover:text-[#01121a] sm:h-10 sm:px-4"
+              >
+                Member Login
+              </Link>
+            )}
 
             <button
               type="button"

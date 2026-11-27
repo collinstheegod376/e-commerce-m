@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ArrowUpRight, Menu, X } from 'lucide-react'
@@ -102,6 +103,18 @@ export function AuthEditorialShell({
       shortLabel: 'Recovery',
       href: '/forgot-password',
       active: pathname === '/forgot-password' || pathname === '/reset-password',
+    },
+    {
+      label: 'Our Story',
+      shortLabel: 'Story',
+      href: '/story',
+      active: pathname === '/story',
+    },
+    {
+      label: 'Contact',
+      shortLabel: 'Contact',
+      href: '/contact',
+      active: pathname === '/contact',
     },
   ]
 
@@ -268,7 +281,7 @@ export function AuthEditorialShell({
           aria-label="Quick auth switch"
           className="grid grid-cols-3 gap-1.5 rounded-sm border border-white/10 bg-[#01121a] p-1"
         >
-          {authNavItems.map((item) => (
+          {authNavItems.slice(0, 3).map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -292,9 +305,13 @@ export function AuthEditorialShell({
             aria-hidden="true"
             className="pointer-events-none absolute -bottom-16 -right-10 h-[74%] w-[68%] opacity-25 mix-blend-screen sm:opacity-35 lg:h-[82%] lg:w-[74%]"
           >
-            <img
+            <Image
               src="/assets/57c8a.png"
               alt=""
+              width={900}
+              height={1100}
+              priority
+              sizes="(max-width: 1024px) 70vw, 45vw"
               className="h-full w-full object-cover object-top"
             />
           </div>

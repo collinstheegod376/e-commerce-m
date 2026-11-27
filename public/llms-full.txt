@@ -1,0 +1,50 @@
+# Maison Kriss — Extended Plain-Text Reference
+
+> Note: This /llms-full.txt file is an AI-agent discovery aid only. It is NOT a Google Search ranking signal and is not displayed in the storefront UI.
+
+## Brand Identity
+
+- **Name:** Maison Kriss
+- **Canonical Domain:** https://www.maisonkriss.shop
+- **Category:** Independent Nigerian contemporary clothing and object studio
+- **Origin:** Lagos, Nigeria
+- **Model:** Members-only private archive and numbered garment releases
+
+## Editorial Philosophy (from /story)
+
+Maison Kriss is an independent Nigerian contemporary clothing and object studio born out of Lagos. Every garment is engineered as an everyday uniform: heavyweight natural fabrics, sharp architectural proportions, and functional hardware built to outlast trend cycles.
+
+Garments are crafted in small numbered runs in Lagos, Nigeria. Flagship silhouettes focus on structured heavyweight fleece, dense heavyweight jersey with high-density plastisol graphics, and rigid washed heavyweight denim designed for durability and everyday rotation.
+
+## Client Services & Fulfillment (from /contact)
+
+Every Maison Kriss release is produced in numbered batches and fulfilled directly from the Lagos studio.
+
+### Studio Hours (Africa/Lagos — WAT)
+- **Monday – Friday:** 9:00 AM – 6:00 PM WAT
+- **Saturday:** 11:00 AM – 4:00 PM WAT
+- **Sunday:** Closed (WhatsApp messages answered Monday morning)
+
+### Dispatch, Delivery & Exchanges
+- **Lagos Metro:** Same-day or next business day courier dispatch after payment confirmation.
+- **Nationwide Nigeria:** 2–4 business days via tracked express courier.
+- **Returns & Exchanges:** Unworn garments with original tags may be exchanged within 7 days of delivery.
+
+### Verified Support Channels
+- **Contact Page:** https://www.maisonkriss.shop/contact
+- **Email:** support@maisonkriss.shop
+- **Order Reference Format:** MK-YYYY-XXXX (include when contacting support about sizing, dispatch, or payment assistance)
+
+## Public vs. Private Routes
+
+- **Publicly Accessible Pages:**
+  - https://www.maisonkriss.shop/story
+  - https://www.maisonkriss.shop/contact
+- **Members-Only / Private Areas (Not Indexed):**
+  - Storefront catalog, product detail pages, shopping cart, checkout/payment confirmation, member profile, and admin dashboard require authentication and are marked noindex.
+
+## Pending Additions (TODO)
+
+- TODO: Confirm whether you want specific garment/collection names listed here or kept strictly members-only.
+- TODO: Add verified founder/creative director bio if you wish it to be publicly attributed.
+- TODO: Add international shipping details if applicable.

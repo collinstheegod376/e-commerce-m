@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { formatNairaCompact } from '@/lib/money'
 import { getProductEditorialMeta } from '@/lib/models-3d'
@@ -53,7 +54,13 @@ export function ProductCard({ product, index }: ProductCardProps) {
         className="product-mark hoodie-mark my-4 block overflow-hidden"
       >
         {heroImg ? (
-          <img src={heroImg} alt={product.name} />
+          <Image
+            src={heroImg}
+            alt={product.name}
+            width={600}
+            height={600}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
         ) : (
           <span>{product.name.slice(0, 2).toUpperCase()}</span>
         )}

@@ -1,0 +1,5 @@
+# Note: /.well-known/security.txt follows RFC 9116 for vulnerability disclosure (NOT an SEO file).
+Contact: mailto:support@maisonkriss.shop
+Preferred-Languages: en
+Canonical: https://www.maisonkriss.shop/.well-known/security.txt
+# TODO: Add an ISO 8601 Expires timestamp (e.g., Expires: 2027-11-27T00:00:00.000Z) and renew annually.

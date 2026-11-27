@@ -2,12 +2,20 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
 const PUBLIC_EXACT_PATHS = new Set([
+  '/story',
+  '/contact',
   '/login',
   '/signup',
   '/forgot-password',
   '/reset-password',
   '/auth/confirm',
   '/auth/confirmed',
+  '/robots.txt',
+  '/sitemap.xml',
+  '/llms.txt',
+  '/llms-full.txt',
+  '/humans.txt',
+  '/.well-known/security.txt',
   '/api/paystack/webhook',
   '/favicon.ico',
   '/favicon.png',
@@ -20,16 +28,40 @@ const PUBLIC_PREFIXES = [
   '/_vercel/',
   '/assets/',
   '/fonts/',
+  '/.well-known/',
+]
+
+const PROTECTED_EXACT_PATHS = new Set([
+  '/',
+  '/products',
+  '/cart',
+  '/profile',
+  '/orders',
+  '/admin',
+])
+
+const PROTECTED_PREFIXES = [
+  '/products/',
+  '/cart/',
+  '/profile/',
+  '/orders/',
+  '/admin/',
+  '/api/',
 ]
 
 function isPublicPath(pathname: string): boolean {
   if (PUBLIC_EXACT_PATHS.has(pathname)) return true
   if (PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return true
   // Static file extensions served from public/
-  if (/\.(?:svg|png|jpg|jpeg|gif|webp|ico|glb|woff2?|css|js|map)$/i.test(pathname)) {
+  if (/\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|glb|woff2?|css|js|map|txt|xml)$/i.test(pathname)) {
     return true
   }
   return false
+}
+
+function isProtectedPath(pathname: string): boolean {
+  if (PROTECTED_EXACT_PATHS.has(pathname)) return true
+  return PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix))
 }
 
 function isAdminPath(pathname: string): boolean {
@@ -44,14 +76,20 @@ function isAdminPath(pathname: string): boolean {
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
 
-  // Skip middleware overhead for static assets & Vercel Analytics/Speed Insights beacons
+  // Skip middleware overhead for static assets, crawl/discovery files & Vercel beacons
   if (
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/_vercel/') ||
     pathname.startsWith('/assets/') ||
     pathname.startsWith('/fonts/') ||
+    pathname.startsWith('/.well-known/') ||
     pathname === '/favicon.ico' ||
-    pathname === '/favicon.png'
+    pathname === '/favicon.png' ||
+    pathname === '/robots.txt' ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/llms.txt' ||
+    pathname === '/llms-full.txt' ||
+    pathname === '/humans.txt'
   ) {
     return NextResponse.next()
   }
@@ -65,12 +103,13 @@ export async function middleware(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  // Allow webhook and public paths cleanly even if env vars are not set yet in local preview
+  // Allow webhook, public pages, and unknown paths (so Next.js serves real 404s) cleanly
   const isApi = pathname.startsWith('/api/')
   const publicRoute = isPublicPath(pathname)
+  const protectedRoute = !publicRoute && isProtectedPath(pathname)
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    if (publicRoute) return response
+    if (!protectedRoute) return response
     if (isApi) {
       return NextResponse.json(
         { error: 'Supabase environment variables are not configured.', code: 'SERVER_MISCONFIGURED' },
@@ -109,11 +148,11 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (publicRoute) {
+  if (!protectedRoute) {
     return response
   }
 
-  // HARD RULE: NO GUEST MODE — all non-public routes require authentication
+  // Members-only routes require authentication
   if (!user) {
     if (isApi) {
       return NextResponse.json(

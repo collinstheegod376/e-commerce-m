@@ -1,12 +1,21 @@
+import type { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
 import { requireUser } from '@/lib/auth'
 import { getCartResponse } from '@/lib/cart'
 import { formatShippingAddress } from '@/lib/money'
 import { extractOrderTrackingMeta } from '@/lib/order-status'
+import { canonicalUrl, NOINDEX_ROBOTS } from '@/lib/seo'
 import { StorefrontHeader } from '@/components/storefront/StorefrontHeader'
 import { ProfileClient } from '@/components/storefront/ProfileClient'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Member Profile — Maison Kriss',
+  description: 'Manage your Maison Kriss member account, delivery address, and order history.',
+  alternates: { canonical: canonicalUrl('/profile') },
+  robots: NOINDEX_ROBOTS,
+}
 
 export default async function ProfilePage() {
   const user = await requireUser('/profile')

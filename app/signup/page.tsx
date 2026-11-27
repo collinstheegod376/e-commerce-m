@@ -1,8 +1,9 @@
 'use client'
 
-import { FormEvent, Suspense, useState } from 'react'
+import { FormEvent, Suspense, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
 import { AuthEditorialShell } from '@/components/auth/AuthEditorialShell'
 
 function safeNext(next: string | null): string {
@@ -20,11 +21,14 @@ function SignupFormInner() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const isLoading = submitting || isPending
   const [error, setError] = useState('')
   const [confirmMessage, setConfirmMessage] = useState('')
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (isLoading) return
     setError('')
     setSubmitting(true)
 
@@ -54,8 +58,10 @@ function SignupFormInner() {
         return
       }
 
-      router.push(nextPath)
-      router.refresh()
+      startTransition(() => {
+        router.push(nextPath)
+        router.refresh()
+      })
     } catch {
       setError('Network error while creating your account. Please try again.')
       setSubmitting(false)
@@ -133,8 +139,20 @@ function SignupFormInner() {
         />
       </label>
 
-      <button className="primary-action disabled:opacity-50" type="submit" disabled={submitting}>
-        {submitting ? 'Creating account…' : 'Create account'}
+      <button
+        className="primary-action flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:opacity-60 disabled:cursor-not-allowed"
+        type="submit"
+        disabled={isLoading}
+        aria-busy={isLoading}
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin text-[#01121a]" aria-hidden="true" />
+            <span>Creating account…</span>
+          </>
+        ) : (
+          <span>Create account</span>
+        )}
       </button>
 
       <div className="mt-6 text-xs text-slate-400">

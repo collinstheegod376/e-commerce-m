@@ -1,8 +1,9 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { FormEvent, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
 import { AuthEditorialShell } from '@/components/auth/AuthEditorialShell'
 
 export default function ResetPasswordPage() {
@@ -10,11 +11,14 @@ export default function ResetPasswordPage() {
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const isLoading = submitting || isPending
   const [error, setError] = useState('')
   const [done, setDone] = useState(false)
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (isLoading) return
     setError('')
 
     if (password.length < 8) {
@@ -41,8 +45,10 @@ export default function ResetPasswordPage() {
       }
       setDone(true)
       setTimeout(() => {
-        router.push('/')
-        router.refresh()
+        startTransition(() => {
+          router.push('/')
+          router.refresh()
+        })
       }, 1200)
     } catch {
       setError('Network error. Please try again.')
@@ -104,11 +110,19 @@ export default function ResetPasswordPage() {
             </label>
 
             <button
-              className="primary-action disabled:opacity-50"
+              className="primary-action flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:opacity-60 disabled:cursor-not-allowed"
               type="submit"
-              disabled={submitting}
+              disabled={isLoading}
+              aria-busy={isLoading}
             >
-              {submitting ? 'Updating password…' : 'Update password'}
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-[#01121a]" aria-hidden="true" />
+                  <span>Updating password…</span>
+                </>
+              ) : (
+                'Update password'
+              )}
             </button>
           </>
         )}

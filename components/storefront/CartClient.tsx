@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { Loader2 } from 'lucide-react'
 import type { CartResponse } from '@/lib/cart'
 import {
   formatNaira,
@@ -84,10 +85,12 @@ export function CartClient({ initialCart, profileSummary }: CartClientProps) {
   }
 
   async function handleCheckout() {
-    if (!hasDeliveryInfo) {
-      setError(
-        `Please add your ${missingDeliveryFields.join(', ')} in Profile before checking out.`,
-      )
+    if (!hasDeliveryInfo || checkoutBusy) {
+      if (!hasDeliveryInfo) {
+        setError(
+          `Please add your ${missingDeliveryFields.join(', ')} in Profile before checking out.`,
+        )
+      }
       return
     }
     setCheckoutBusy(true)
@@ -212,13 +215,19 @@ export function CartClient({ initialCart, profileSummary }: CartClientProps) {
               type="button"
               disabled={checkoutBusy || !hasDeliveryInfo}
               onClick={handleCheckout}
-              className="min-h-[48px] disabled:cursor-not-allowed disabled:opacity-45"
+              aria-busy={checkoutBusy}
+              className="min-h-[48px] w-full flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:cursor-not-allowed disabled:opacity-45"
             >
-              {checkoutBusy
-                ? 'Initializing Paystack…'
-                : !hasDeliveryInfo
-                  ? 'Add Location Details to Checkout'
-                  : 'Checkout with Paystack'}
+              {checkoutBusy ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-current" aria-hidden="true" />
+                  <span>Initializing Paystack…</span>
+                </>
+              ) : !hasDeliveryInfo ? (
+                'Add Location Details to Checkout'
+              ) : (
+                'Checkout with Paystack'
+              )}
             </button>
             <small>Final order total &amp; shipping are verified server-side on checkout.</small>
           </aside>

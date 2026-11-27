@@ -1,18 +1,30 @@
+import type { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
-import { requireUser } from '@/lib/auth'
+import { getUser } from '@/lib/auth'
 import { getCartResponse } from '@/lib/cart'
 import { buildPaymentFailureSupportLinks, getSupportConfig } from '@/lib/support'
+import { canonicalUrl } from '@/lib/seo'
 import { StorefrontHeader } from '@/components/storefront/StorefrontHeader'
 import { MarkdownContent } from '@/components/storefront/MarkdownContent'
+import { Breadcrumbs } from '@/components/storefront/Breadcrumbs'
 
 export const dynamic = 'force-dynamic'
 
+export const metadata: Metadata = {
+  title: 'Contact & Client Services — Maison Kriss Lagos',
+  description:
+    'Contact Maison Kriss Client Services in Lagos via WhatsApp, email, or studio phone for sizing, dispatch, delivery, and order support.',
+  alternates: {
+    canonical: canonicalUrl('/contact'),
+  },
+}
+
 export default async function ContactPage() {
-  const user = await requireUser('/contact')
+  const user = await getUser()
 
   const [page, cart] = await Promise.all([
     prisma.page.findUnique({ where: { slug: 'contact' } }),
-    getCartResponse(user.id),
+    user ? getCartResponse(user.id) : Promise.resolve({ items: [] }),
   ])
 
   const cartCount = cart.items.reduce((sum, item) => sum + item.qty, 0)
@@ -21,13 +33,20 @@ export default async function ContactPage() {
 
   return (
     <main className="storefront inner-page">
-      <img className="guide-lines" src="/assets/b6522.svg" alt="" />
+      <img className="guide-lines" src="/assets/b6522.svg" alt="" width={1200} height={800} />
       <StorefrontHeader
         initialCartCount={cartCount}
-        isAdmin={user.role === 'admin'}
-        userName={user.name}
+        isAdmin={user?.role === 'admin'}
+        userName={user?.name}
+        isAuthenticated={Boolean(user)}
       />
       <section className="page-shell">
+        <Breadcrumbs
+          items={[
+            { label: 'Our Story', href: '/story' },
+            { label: 'Contact', href: '/contact' },
+          ]}
+        />
         <p className="page-kicker">Client Services / Lagos</p>
         <div className="page-title-row">
           <h1>{page?.title ?? 'Contact'}</h1>

@@ -1,0 +1,19 @@
+/* Note: /humans.txt is a human-readable credits file, NOT an SEO file. */
+
+/* TEAM */
+Brand & Studio: Maison Kriss
+Location: Lagos, Nigeria
+Site: https://www.maisonkriss.shop
+Contact: support@maisonkriss.shop
+Creative Direction: TODO (add founder / creative director name)
+Engineering: TODO (add engineering credits)
+
+/* SITE */
+Language: English
+Standards: HTML5, CSS3, TypeScript, JSON-LD
+Framework: Next.js 15 (App Router), React 19
+Styling: Tailwind CSS 4
+Database & Auth: Prisma, Supabase (PostgreSQL)
+Payments: Paystack
+Hosting & Edge: Vercel
+Fonts: Space Grotesk, Syne, Permanent Marker

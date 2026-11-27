@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import {
   BarChart3,
   FileText,
   LifeBuoy,
+  Loader2,
   LogOut,
   Package,
   Settings,
@@ -34,13 +35,35 @@ const NAV_ITEMS = [
 export function AdminShell({ adminName, adminEmail, children }: AdminShellProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const [signingOut, setSigningOut] = useState(false)
+  const [isSigningOut, setIsSigningOut] = useState(false)
+  const [signOutNavPending, startSignOutTransition] = useTransition()
+  const signingOut = isSigningOut || signOutNavPending
+
+  const [navPending, startNavTransition] = useTransition()
+  const [pendingHref, setPendingHref] = useState<string | null>(null)
+
+  function handleNavClick(href: string, e: React.MouseEvent<HTMLAnchorElement>) {
+    if (pathname === href) return
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    e.preventDefault()
+    setPendingHref(href)
+    startNavTransition(() => {
+      router.push(href)
+    })
+  }
 
   async function handleSignOut() {
-    setSigningOut(true)
-    await fetch('/api/auth/signout', { method: 'POST' })
-    router.push('/login')
-    router.refresh()
+    if (signingOut) return
+    setIsSigningOut(true)
+    try {
+      await fetch('/api/auth/signout', { method: 'POST' })
+      startSignOutTransition(() => {
+        router.push('/login')
+        router.refresh()
+      })
+    } catch {
+      setIsSigningOut(false)
+    }
   }
 
   return (
@@ -74,20 +97,27 @@ export function AdminShell({ adminName, adminEmail, children }: AdminShellProps)
             const active = item.exact
               ? pathname === item.href
               : pathname === item.href || pathname.startsWith(`${item.href}/`)
+            const isNavigating = navPending && pendingHref === item.href
             const Icon = item.icon
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={(e) => handleNavClick(item.href, e)}
                 className={[
-                  'shrink-0 flex min-h-[40px] items-center gap-2.5 md:gap-3 px-3 py-2 text-xs font-medium tracking-[0.02em] transition-colors whitespace-nowrap',
+                  'shrink-0 flex min-h-[40px] items-center gap-2.5 md:gap-3 px-3 py-2 text-xs font-medium tracking-[0.02em] transition-all whitespace-nowrap active:scale-[0.98]',
                   active
                     ? 'bg-white text-[#030304]'
-                    : 'text-[#b5b5b5] hover:bg-[#161618] hover:text-white',
+                    : isNavigating
+                      ? 'bg-[#1a1a1d] text-white ring-1 ring-[#ff5331]/60'
+                      : 'text-[#b5b5b5] hover:bg-[#161618] hover:text-white',
                 ].join(' ')}
               >
                 <Icon className="h-4 w-4 shrink-0" />
                 <span>{item.label}</span>
+                {isNavigating ? (
+                  <Loader2 className="ml-auto h-3 w-3 animate-spin text-[#ff5331]" aria-hidden="true" />
+                ) : null}
               </Link>
             )
           })}
@@ -123,9 +153,14 @@ export function AdminShell({ adminName, adminEmail, children }: AdminShellProps)
               type="button"
               disabled={signingOut}
               onClick={handleSignOut}
-              className="inline-flex min-h-[36px] items-center gap-1.5 border border-[#d6d6d6] bg-white px-3 py-1.5 text-xs font-medium text-[#030304] hover:border-[#030304] disabled:opacity-50"
+              aria-busy={signingOut}
+              className="inline-flex min-h-[36px] items-center gap-1.5 border border-[#d6d6d6] bg-white px-3 py-1.5 text-xs font-medium text-[#030304] hover:border-[#030304] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <LogOut className="h-3.5 w-3.5" />
+              {signingOut ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-[#ff5331]" aria-hidden="true" />
+              ) : (
+                <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
               <span>{signingOut ? 'Signing out…' : 'Sign out'}</span>
             </button>
           </div>

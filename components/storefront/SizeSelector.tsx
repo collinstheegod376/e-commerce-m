@@ -46,7 +46,7 @@ export function SizeSelector({
               disabled={outOfStock}
               onClick={() => onSelect(variant.id)}
               className={[
-                'rounded-md border transition-all duration-200 text-xs font-bold uppercase tracking-[0.08em]',
+                'rounded-md border transition-all duration-200 text-xs font-bold uppercase tracking-[0.08em] active:scale-95',
                 compact ? 'px-2.5 py-1.5' : 'px-4 py-2.5',
                 outOfStock
                   ? 'border-white/10 bg-[#01121a]/60 text-slate-600 line-through cursor-not-allowed'

@@ -1,7 +1,8 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { FormEvent, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
 import { formatNaira } from '@/lib/money'
 import {
   MIN_PRODUCT_IMAGES,
@@ -42,6 +43,8 @@ export function EditProductClient({ product }: EditProductClientProps) {
   const [images, setImages] = useState<string[]>(product.images)
   const [active, setActive] = useState(product.active)
   const [savingProduct, setSavingProduct] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const isSaving = savingProduct || isPending
   const [productNotice, setProductNotice] = useState('')
   const [productError, setProductError] = useState('')
 
@@ -60,6 +63,7 @@ export function EditProductClient({ product }: EditProductClientProps) {
 
   async function handleSaveProduct(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (isSaving) return
     setProductNotice('')
     setProductError('')
 
@@ -95,7 +99,9 @@ export function EditProductClient({ product }: EditProductClientProps) {
         return
       }
       setProductNotice('Product changes saved.')
-      router.refresh()
+      startTransition(() => {
+        router.refresh()
+      })
     } catch {
       setProductError('Network error saving product.')
     } finally {
@@ -295,10 +301,18 @@ export function EditProductClient({ product }: EditProductClientProps) {
 
         <button
           type="submit"
-          disabled={savingProduct}
-          className="bg-[#030304] px-5 py-2.5 text-xs font-medium uppercase tracking-[0.06em] text-white hover:bg-[#1f1f22] disabled:opacity-50"
+          disabled={isSaving}
+          aria-busy={isSaving}
+          className="inline-flex items-center gap-2 bg-[#030304] px-5 py-2.5 text-xs font-medium uppercase tracking-[0.06em] text-white hover:bg-[#1f1f22] active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {savingProduct ? 'Saving…' : 'Save Product'}
+          {isSaving ? (
+            <>
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-white" aria-hidden="true" />
+              <span>Saving…</span>
+            </>
+          ) : (
+            'Save Product'
+          )}
         </button>
       </form>
 

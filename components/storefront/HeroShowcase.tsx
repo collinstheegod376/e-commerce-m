@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import {
   ArrowDown,
@@ -71,7 +72,7 @@ export function HeroShowcase({ products }: HeroShowcaseProps) {
           aria-label="Featured drop showcase"
         >
           {/* Ambient radial glow & guide lines */}
-          <img className="guide-lines" src="/assets/b6522.svg" alt="" />
+          <img className="guide-lines" src="/assets/b6522.svg" alt="" width={1200} height={800} />
           <div
             aria-hidden="true"
             className="pointer-events-none absolute -top-28 right-1/4 h-96 w-96 rounded-full bg-[#ff660c]/12 blur-[130px]"
@@ -367,9 +368,13 @@ export function HeroShowcase({ products }: HeroShowcaseProps) {
                   <div className="relative my-auto flex h-[280px] w-full items-center justify-center sm:h-[420px] lg:h-[450px]">
                     <div className="relative flex h-full w-full items-center justify-center p-2 sm:p-4">
                       <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-xl bg-slate-100 p-4 shadow-inner">
-                        <img
+                        <Image
                           src={activeProduct.images[0] ?? '/assets/57c8a.png'}
                           alt={activeProduct.name}
+                          width={800}
+                          height={800}
+                          priority
+                          sizes="(max-width: 1024px) 90vw, 32vw"
                           className="max-h-full max-w-full object-contain mix-blend-multiply transition-transform duration-500 hover:scale-105"
                         />
                       </div>

@@ -1,7 +1,16 @@
+import type { Metadata } from 'next'
 import { requireAdmin } from '@/lib/auth'
+import { canonicalUrl, NOINDEX_ROBOTS } from '@/lib/seo'
 import { AdminShell } from '@/components/admin/AdminShell'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Admin Dashboard — Maison Kriss',
+  description: 'Internal Maison Kriss studio administration.',
+  alternates: { canonical: canonicalUrl('/admin') },
+  robots: NOINDEX_ROBOTS,
+}
 
 export default async function AdminLayout({
   children,

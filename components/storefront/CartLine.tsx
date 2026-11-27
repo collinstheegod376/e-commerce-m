@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { Loader2 } from 'lucide-react'
 import type { CartLineItem } from '@/lib/cart'
 import { formatNairaCompact } from '@/lib/money'
 import { QtyStepper } from '@/components/storefront/QtyStepper'
@@ -54,9 +55,11 @@ export function CartLine({
           type="button"
           disabled={busy}
           onClick={() => onRemove(item.id)}
-          className="mt-2 inline-flex min-h-[36px] items-center text-[11px] uppercase tracking-[0.06em] text-[#757575] underline underline-offset-4 hover:text-[#ff5331] disabled:opacity-40"
+          aria-busy={busy}
+          className="mt-2 inline-flex min-h-[36px] items-center gap-1.5 text-[11px] uppercase tracking-[0.06em] text-[#757575] underline underline-offset-4 hover:text-[#ff5331] active:opacity-70 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          Remove
+          {busy ? <Loader2 className="h-3 w-3 animate-spin text-[#ff5331]" aria-hidden="true" /> : null}
+          <span>{busy ? 'Updating…' : 'Remove'}</span>
         </button>
       </div>
 

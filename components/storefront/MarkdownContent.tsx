@@ -94,7 +94,7 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
     } else if (line.startsWith('## ')) {
       blocks.push(<h2 key={`h2-${key++}`}>{renderInline(line.slice(3))}</h2>)
     } else if (line.startsWith('# ')) {
-      blocks.push(<h1 key={`h1-${key++}`}>{renderInline(line.slice(2))}</h1>)
+      blocks.push(<h2 key={`h2-${key++}`}>{renderInline(line.slice(2))}</h2>)
     } else {
       blocks.push(<p key={`p-${key++}`}>{renderInline(line)}</p>)
     }

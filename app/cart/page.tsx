@@ -1,9 +1,18 @@
+import type { Metadata } from 'next'
 import { requireUser } from '@/lib/auth'
 import { getCartResponse } from '@/lib/cart'
+import { canonicalUrl, NOINDEX_ROBOTS } from '@/lib/seo'
 import { StorefrontHeader } from '@/components/storefront/StorefrontHeader'
 import { CartClient } from '@/components/storefront/CartClient'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Your Cart — Maison Kriss',
+  description: 'Review your selected Maison Kriss pieces and proceed to checkout.',
+  alternates: { canonical: canonicalUrl('/cart') },
+  robots: NOINDEX_ROBOTS,
+}
 
 export default async function CartPage() {
   const user = await requireUser('/cart')
