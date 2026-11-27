@@ -17,6 +17,7 @@ const PUBLIC_PREFIXES = [
   '/api/auth/',
   '/api/pages/',
   '/_next/',
+  '/_vercel/',
   '/assets/',
   '/fonts/',
 ]
@@ -43,9 +44,10 @@ function isAdminPath(pathname: string): boolean {
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
 
-  // Skip middleware overhead for static assets
+  // Skip middleware overhead for static assets & Vercel Analytics/Speed Insights beacons
   if (
     pathname.startsWith('/_next/') ||
+    pathname.startsWith('/_vercel/') ||
     pathname.startsWith('/assets/') ||
     pathname.startsWith('/fonts/') ||
     pathname === '/favicon.ico' ||
@@ -157,8 +159,8 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except Next.js internals & static image/media files.
+     * Match all request paths except Next.js internals, Vercel Analytics/Speed Insights, & static favicons.
      */
-    '/((?!_next/static|_next/image|favicon.ico|favicon.png).*)',
+    '/((?!_next/static|_next/image|_vercel|favicon.ico|favicon.png).*)',
   ],
 }
