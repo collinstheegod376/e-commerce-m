@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { emails } from '@/lib/emails'
 import { checkRateLimit, extractClientIp, rateLimitHeaders } from '@/lib/rate-limit'
 import { handleRouteError, jsonError } from '@/lib/http'
 import { getSupportConfig } from '@/lib/support'
@@ -27,11 +29,46 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createServerSupabaseClient()
     const { siteUrl } = getSupportConfig()
+    const normalizedSiteUrl = siteUrl.replace(/\/$/, '')
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const resendApiKey = process.env.RESEND_API_KEY
+
+    if (resendApiKey && serviceRoleKey && supabaseUrl) {
+      const adminSupabase = createClient(supabaseUrl, serviceRoleKey, {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      })
+
+      const { data, error } = await adminSupabase.auth.admin.generateLink({
+        type: 'recovery',
+        email: body.email,
+        options: {
+          redirectTo: `${normalizedSiteUrl}/auth/confirm?next=/reset-password`,
+        },
+      })
+
+      if (error) {
+        // Log internally, never leak whether email exists
+        console.warn('[auth:forgot-password] Supabase generateLink error:', error.message)
+      } else if (data?.properties?.hashed_token) {
+        const resetUrl = `${normalizedSiteUrl}/auth/confirm?token_hash=${encodeURIComponent(data.properties.hashed_token)}&type=recovery&next=/reset-password`
+        await emails.sendPasswordResetEmail({
+          to: body.email,
+          resetUrl,
+        })
+      }
+
+      return NextResponse.json({ ok: true, message: GENERIC_SUCCESS_MESSAGE })
+    }
+
+    const supabase = await createServerSupabaseClient()
 
     const { error } = await supabase.auth.resetPasswordForEmail(body.email, {
-      redirectTo: `${siteUrl.replace(/\/$/, '')}/auth/confirm?next=/reset-password`,
+      redirectTo: `${normalizedSiteUrl}/auth/confirm?next=/reset-password`,
     })
 
     if (error) {

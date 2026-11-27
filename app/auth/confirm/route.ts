@@ -19,10 +19,12 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code')
   const nextParam = searchParams.get('next')
 
-  const defaultNext = typeParam === 'recovery' ? '/reset-password' : '/'
+  const defaultNext = typeParam === 'recovery' ? '/reset-password' : '/auth/confirmed'
   const safeNext = sanitizeNextPath(nextParam, defaultNext)
+  const isRecovery = typeParam === 'recovery' || safeNext === '/reset-password'
 
   const supabase = await createServerSupabaseClient()
+  let verified = false
 
   if (tokenHash && typeParam && VALID_OTP_TYPES.has(typeParam)) {
     const { error } = await supabase.auth.verifyOtp({
@@ -31,19 +33,29 @@ export async function GET(request: NextRequest) {
     })
 
     if (!error) {
-      const target = request.nextUrl.clone()
-      target.pathname = safeNext
-      target.search = ''
-      return NextResponse.redirect(target)
+      verified = true
     }
   } else if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
+      verified = true
+    }
+  }
+
+  if (verified) {
+    if (isRecovery) {
       const target = request.nextUrl.clone()
-      target.pathname = safeNext
+      target.pathname = '/reset-password'
       target.search = ''
       return NextResponse.redirect(target)
     }
+
+    await supabase.auth.signOut()
+
+    const target = request.nextUrl.clone()
+    target.pathname = '/auth/confirmed'
+    target.search = ''
+    return NextResponse.redirect(target)
   }
 
   const loginUrl = request.nextUrl.clone()

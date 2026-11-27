@@ -3,6 +3,7 @@
 import { FormEvent, Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { Check } from 'lucide-react'
 import { AuthEditorialShell } from '@/components/auth/AuthEditorialShell'
 
 function safeNext(next: string | null): string {
@@ -16,6 +17,7 @@ function LoginFormInner() {
   const searchParams = useSearchParams()
   const nextPath = safeNext(searchParams.get('next'))
   const urlError = searchParams.get('error')
+  const isConfirmed = searchParams.get('confirmed') === '1'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -55,6 +57,18 @@ function LoginFormInner() {
     <form className="flex flex-col" onSubmit={onSubmit}>
       <p className="page-kicker">Welcome back</p>
       <h2>Sign in</h2>
+
+      {isConfirmed && !error ? (
+        <div
+          role="status"
+          className="mb-6 flex items-start gap-3 rounded-lg border border-emerald-400/30 border-l-4 border-l-emerald-400 bg-emerald-500/12 px-4 py-3 text-sm text-[#f8fafc]"
+        >
+          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-400 text-[#01121a]">
+            <Check className="h-3.5 w-3.5 stroke-[3]" aria-hidden="true" />
+          </span>
+          <span>Your email is confirmed. Sign in with your credentials below.</span>
+        </div>
+      ) : null}
 
       {error ? (
         <div

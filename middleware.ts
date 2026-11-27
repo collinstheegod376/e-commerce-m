@@ -7,6 +7,7 @@ const PUBLIC_EXACT_PATHS = new Set([
   '/forgot-password',
   '/reset-password',
   '/auth/confirm',
+  '/auth/confirmed',
   '/api/paystack/webhook',
   '/favicon.ico',
   '/favicon.png',

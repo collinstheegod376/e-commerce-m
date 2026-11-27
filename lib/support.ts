@@ -9,7 +9,7 @@ export interface SupportConfig {
 export function getSupportConfig(): SupportConfig {
   const shippingRaw = Number(process.env.FLAT_SHIPPING_KOBO ?? '0')
   return {
-    email: process.env.SUPPORT_EMAIL || 'support@maisonkriss.com',
+    email: process.env.SUPPORT_EMAIL || 'support@maisonkriss.shop',
     phone: process.env.SUPPORT_PHONE || '+2348000000000',
     whatsapp: process.env.SUPPORT_WHATSAPP || '+2348000000000',
     siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',

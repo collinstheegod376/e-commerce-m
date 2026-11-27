@@ -5,12 +5,29 @@ import { getSupportConfig, sanitizeWhatsappNumber } from '@/lib/support'
 import type { FullOrder } from '@/lib/notifier.stub'
 
 const RESEND_TIMEOUT_MS = 2500
+const DEFAULT_RESEND_FROM = 'Maison Kriss <orders@maisonkriss.shop>'
 
 export type OrderStatusEmailType = 'paid' | 'confirmed' | 'sent_out' | 'delivered'
 
 export interface OrderStatusEmailOptions {
   note?: string
   estimatedDelivery?: string
+}
+
+export interface EmailSendResult {
+  sent: boolean
+  error?: string
+}
+
+export interface AuthConfirmationEmailParams {
+  to: string
+  name?: string | null
+  confirmUrl: string
+}
+
+export interface PasswordResetEmailParams {
+  to: string
+  resetUrl: string
 }
 
 function escapeHtml(input: string): string {
@@ -358,6 +375,129 @@ async function sendOnce(
   await Promise.race([sendPromise, timeoutPromise])
 }
 
+interface AuthEmailTemplateConfig {
+  title: string
+  eyebrow: string
+  headline: string
+  greeting: string
+  bodyParagraph: string
+  ctaLabel: string
+  ctaUrl: string
+  securityNote?: string
+}
+
+function buildBrandedAuthEmailHtml(config: AuthEmailTemplateConfig): string {
+  const support = getSupportConfig()
+  const waNumber = sanitizeWhatsappNumber(support.whatsapp)
+  const escapedUrl = escapeHtml(config.ctaUrl)
+
+  const securityNoteBlock = config.securityNote
+    ? `
+                <div style="margin-top:22px;padding:14px 16px;border-left:3px solid #01121a;background:#f6f8f9;">
+                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#5b6770;font-weight:700;">
+                    Security Note
+                  </div>
+                  <div style="margin-top:4px;font-size:13px;color:#01121a;line-height:1.55;">
+                    ${escapeHtml(config.securityNote)}
+                  </div>
+                </div>
+    `
+    : ''
+
+  return `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>${escapeHtml(config.title)}</title>
+  </head>
+  <body style="margin:0;padding:0;background:#f3f5f6;font-family:Arial,Helvetica,sans-serif;color:#01121a;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;width:100%;background:#ffffff;border:1px solid #d7dde0;">
+            <tr>
+              <td style="background:#01121a;color:#ffffff;padding:30px 32px;border-bottom:3px solid #ff660c;">
+                <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#ff660c;font-weight:700;">
+                  ${escapeHtml(config.eyebrow)}
+                </div>
+                <h1 style="margin:10px 0 0;font-size:27px;letter-spacing:-0.03em;font-weight:700;color:#ffffff;">
+                  ${escapeHtml(config.headline)}
+                </h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:28px 32px;">
+                <p style="margin:0 0 12px;font-size:15px;line-height:1.6;color:#01121a;">
+                  ${escapeHtml(config.greeting)}
+                </p>
+                <p style="margin:0 0 24px;font-size:14px;line-height:1.65;color:#3d4a52;">
+                  ${escapeHtml(config.bodyParagraph)}
+                </p>
+
+                <div style="margin:26px 0;text-align:center;">
+                  <a href="${escapedUrl}" style="display:inline-block;background:#ff660c;color:#ffffff;text-decoration:none;font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:14px 28px;border-bottom:2px solid #01121a;">
+                    ${escapeHtml(config.ctaLabel)}
+                  </a>
+                </div>
+                ${securityNoteBlock}
+                <div style="margin-top:22px;padding:14px 16px;background:#fff7f2;border-left:3px solid #ff660c;">
+                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#b84500;font-weight:700;">
+                    Link Fallback
+                  </div>
+                  <p style="margin:6px 0 6px;font-size:12px;color:#3d4a52;line-height:1.55;">
+                    If the button above does not open, copy and paste this link into your browser:
+                  </p>
+                  <p style="margin:0;font-size:12px;line-height:1.5;word-break:break-all;">
+                    <a href="${escapedUrl}" style="color:#01121a;text-decoration:underline;">${escapedUrl}</a>
+                  </p>
+                </div>
+
+                <div style="margin-top:28px;padding-top:20px;border-top:1px solid #e2e7ea;font-size:12px;color:#5b6770;line-height:1.7;">
+                  Need help with your account? Contact Maison Kriss Client Services:<br/>
+                  WhatsApp: <a href="https://wa.me/${waNumber}" style="color:#01121a;font-weight:600;">${escapeHtml(support.whatsapp)}</a> ·
+                  Email: <a href="mailto:${escapeHtml(support.email)}" style="color:#01121a;font-weight:600;">${escapeHtml(support.email)}</a> ·
+                  Phone: ${escapeHtml(support.phone)}
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`
+}
+
+function buildAuthConfirmationHtml(params: AuthConfirmationEmailParams): string {
+  const displayName = params.name?.trim() || params.to.split('@')[0] || 'Client'
+  return buildBrandedAuthEmailHtml({
+    title: 'Confirm your Maison Kriss account',
+    eyebrow: 'Maison Kriss · Lagos Studio',
+    headline: 'Confirm Your Account',
+    greeting: `Hello ${displayName},`,
+    bodyParagraph:
+      'Welcome to Maison Kriss. Our Lagos studio is pleased to have you with us — please confirm your email address to activate your account, save your delivery details, and follow every order from studio review to doorstep delivery.',
+    ctaLabel: 'Confirm Account →',
+    ctaUrl: params.confirmUrl,
+  })
+}
+
+function buildPasswordResetHtml(params: PasswordResetEmailParams): string {
+  return buildBrandedAuthEmailHtml({
+    title: 'Reset your Maison Kriss password',
+    eyebrow: 'Maison Kriss · Account Security',
+    headline: 'Reset Your Password',
+    greeting: 'Hello,',
+    bodyParagraph:
+      'We received a request to reset the password for your Maison Kriss account. Use the button below to choose a new password and regain access to your account.',
+    ctaLabel: 'Reset Password →',
+    ctaUrl: params.resetUrl,
+    securityNote:
+      "If you didn't request this, you can safely ignore this email. Your Maison Kriss password will remain unchanged.",
+  })
+}
+
 async function deliverEmail(
   eventPrefix: string,
   order: FullOrder,
@@ -365,7 +505,7 @@ async function deliverEmail(
   html: string,
 ): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY
-  const from = process.env.RESEND_FROM || 'Maison Kriss <orders@maisonkriss.com>'
+  const from = process.env.RESEND_FROM || DEFAULT_RESEND_FROM
 
   if (!apiKey) {
     console.warn(
@@ -412,6 +552,63 @@ async function deliverEmail(
   }
 }
 
+async function deliverDirectEmail(
+  eventPrefix: string,
+  to: string,
+  subject: string,
+  html: string,
+): Promise<EmailSendResult> {
+  const apiKey = process.env.RESEND_API_KEY
+  const from = process.env.RESEND_FROM || DEFAULT_RESEND_FROM
+
+  if (!apiKey) {
+    console.warn(
+      JSON.stringify({
+        event: `${eventPrefix}.skipped`,
+        to,
+        reason: 'Missing RESEND_API_KEY',
+      }),
+    )
+    return { sent: false, error: 'Missing RESEND_API_KEY' }
+  }
+
+  const resend = new Resend(apiKey)
+  const payload = {
+    from,
+    to,
+    subject,
+    html,
+  }
+
+  let lastError = 'Unknown Resend delivery error'
+
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      await sendOnce(resend, payload)
+      console.info(
+        JSON.stringify({
+          event: `${eventPrefix}.sent`,
+          to,
+          attempt,
+        }),
+      )
+      return { sent: true }
+    } catch (err) {
+      lastError = err instanceof Error ? err.message : String(err)
+      console.error(
+        JSON.stringify({
+          event: `${eventPrefix}.error`,
+          to,
+          attempt,
+          message: lastError,
+        }),
+      )
+    }
+  }
+
+  return { sent: false, error: lastError }
+}
+
 export const emails = {
   /**
    * Sends the initial "Thank you for your order" receipt via Resend.
@@ -437,5 +634,35 @@ export const emails = {
   ): Promise<void> {
     const { subject, html } = getStatusUpdateEmailSpec(order, newStatus, opts)
     await deliverEmail(`emails.status.${newStatus}`, order, subject, html)
+  },
+
+  /**
+   * Sends a branded account confirmation email via Resend.
+   * Retries once on transient failure, bounded by timeout, and NEVER throws.
+   */
+  async sendAuthConfirmationEmail(
+    params: AuthConfirmationEmailParams,
+  ): Promise<EmailSendResult> {
+    return deliverDirectEmail(
+      'emails.auth.confirmation',
+      params.to,
+      'Confirm your Maison Kriss account',
+      buildAuthConfirmationHtml(params),
+    )
+  },
+
+  /**
+   * Sends a branded password reset email via Resend.
+   * Retries once on transient failure, bounded by timeout, and NEVER throws.
+   */
+  async sendPasswordResetEmail(
+    params: PasswordResetEmailParams,
+  ): Promise<EmailSendResult> {
+    return deliverDirectEmail(
+      'emails.auth.password_reset',
+      params.to,
+      'Reset your Maison Kriss password',
+      buildPasswordResetHtml(params),
+    )
   },
 }

@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { ensureProfileForAuthUser } from '@/lib/auth'
+import { emails } from '@/lib/emails'
 import { checkRateLimit, extractClientIp, rateLimitHeaders } from '@/lib/rate-limit'
 import { handleRouteError, jsonError } from '@/lib/http'
 import { getSupportConfig } from '@/lib/support'
@@ -27,15 +29,86 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createServerSupabaseClient()
     const { siteUrl } = getSupportConfig()
+    const normalizedSiteUrl = siteUrl.replace(/\/$/, '')
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const resendApiKey = process.env.RESEND_API_KEY
+
+    if (resendApiKey && serviceRoleKey && supabaseUrl) {
+      const adminSupabase = createClient(supabaseUrl, serviceRoleKey, {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      })
+
+      const { data, error } = await adminSupabase.auth.admin.generateLink({
+        type: 'signup',
+        email: body.email,
+        password: body.password,
+        options: {
+          data: { name: body.name },
+          redirectTo: `${normalizedSiteUrl}/auth/confirm`,
+        },
+      })
+
+      if (error) {
+        return jsonError(400, error.message, 'SIGNUP_FAILED')
+      }
+
+      const hashedToken = data.properties?.hashed_token
+      if (!hashedToken) {
+        return jsonError(
+          500,
+          'Could not generate email confirmation link. Please try again.',
+          'SIGNUP_LINK_FAILED',
+        )
+      }
+
+      const confirmUrl = `${normalizedSiteUrl}/auth/confirm?token_hash=${encodeURIComponent(hashedToken)}&type=signup`
+
+      let profile = null
+      if (data.user) {
+        try {
+          profile = await ensureProfileForAuthUser({
+            id: data.user.id,
+            email: data.user.email ?? body.email,
+            user_metadata: { name: body.name },
+          })
+        } catch (profileErr) {
+          console.warn('[auth:signup] Profile upsert deferred:', profileErr)
+        }
+      }
+
+      await emails.sendAuthConfirmationEmail({
+        to: body.email,
+        name: body.name,
+        confirmUrl,
+      })
+
+      return NextResponse.json(
+        {
+          user: profile
+            ? { id: profile.id, email: profile.email, name: profile.name, role: profile.role }
+            : data.user
+              ? { id: data.user.id, email: data.user.email ?? body.email, name: body.name, role: 'customer' }
+              : null,
+          needsEmailConfirmation: true,
+          message: 'Check your email to confirm your account before signing in.',
+        },
+        { status: 201 },
+      )
+    }
+
+    const supabase = await createServerSupabaseClient()
 
     const { data, error } = await supabase.auth.signUp({
       email: body.email,
       password: body.password,
       options: {
         data: { name: body.name },
-        emailRedirectTo: `${siteUrl.replace(/\/$/, '')}/auth/confirm?next=/`,
+        emailRedirectTo: `${normalizedSiteUrl}/auth/confirm?next=/`,
       },
     })
 
